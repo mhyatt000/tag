@@ -1,16 +1,34 @@
 [project]
-name = "mybrax"
+name = "tag"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "brax>=0.12.1",
     "gymnasium>=1.1.1",
-    "jax[cuda12]>=0.5.3",
     "matplotlib>=3.10.1",
     "mediapy>=1.2.2",
-    "mujoco>=3.3.0",
-    "mujoco-mjx>=3.3.0",
     "tqdm>=4.67.1",
+    "wandb>=0.19.11",
+]
+
+[project.optional-dependencies]
+brax = [
+    "brax>=0.12.1",
+    "jax[cuda12]>=0.5.3",
+    "mujoco>=3.2.5",
+    "mujoco-mjx>=3.2.5",
+]
+genesis = [
+    "genesis-world>=0.2.1",
+    "tensorboard>=2.19.0",
+    "torch>=2.0.1",
+]
+gl = [
+    "pyopengl-accelerate>=3.1.9",
+    "pyrender>=0.1.45",
+]
+debug = [
+    "ipdb>=0.13.13",
+    "ipython>=9.0.2",
 ]
