@@ -37,6 +37,9 @@ debug = [
     "ipdb>=0.13.13",
     "ipython>=9.0.2",
 ]
+dev = [
+    "pre-commit>=4.2.0",
+]
 
 [tool.uv.sources]
 genesis-lr = { git = "https://github.com/lupinjia/genesis_lr" }
@@ -53,3 +56,26 @@ rsl-rl = { git = "https://github.com/leggedrobotics/rsl_rl", rev = "v1.0.2" }
 # torchvision = [
   # { index = "pytorch-cu124", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 # ]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle
+  "F",  # pyflakes
+  "I",  # isort
+]
+ignore = [
+  "F841",  # assigned but unused variable
+  "F821",  # undefined name
+  "E731",  # do not assign lambda
+  "E722",  # do not use bare except
+  "E402",  # module import not at top of file
+  "E501"  # line too long
+]
+
+
+[tool.ruff.lint.isort]
+# force-single-line = true
+force-sort-within-sections = true
