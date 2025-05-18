@@ -8,6 +8,7 @@ A collection of experiments and helper scripts around the brax and mujoco enviro
 - [Directory Structure](#directory-structure)
 - [Usage](#usage)
   - [Scripts](#scripts)
+  - [Terrain](#terrain)
 
 ## Installation
 
@@ -47,3 +48,26 @@ python main.py
 ### Scripts
 
 `main.py` provides a simple script that demonstrates training or running Brax environments. Custom scripts can be added under the `tag` package as needed.
+
+### Terrain
+
+Example for creating a composite terrain in Genesis:
+
+```python
+import genesis as gs
+gs.init(backend=gs.cpu)
+
+scene = gs.Scene(show_viewer=True)
+terrain = scene.add_entity(
+    gs.morphs.Terrain(
+        n_subterrains=(3, 3),
+        subterrain_size=(12.0, 12.0),
+        subterrain_types=[
+            ['flat_terrain', 'random_uniform_terrain', 'stepping_stones_terrain'],
+            ['pyramid_sloped_terrain', 'discrete_obstacles_terrain', 'wave_terrain'],
+            ['random_uniform_terrain', 'pyramid_stairs_terrain', 'sloped_terrain']
+        ],
+        randomize=True
+    )
+)
+```
