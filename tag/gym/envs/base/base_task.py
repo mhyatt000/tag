@@ -44,17 +44,11 @@ class BaseTask(ABC):
         self.num_privileged_obs = cfg.env.num_privileged_obs
         self.num_actions = cfg.env.num_actions
 
-        self.obs_buf = torch.zeros(
-            self.num_envs, self.num_obs, device=self.device, dtype=gs.tc_float
-        )
+        self.obs_buf = torch.zeros(self.num_envs, self.num_obs, device=self.device, dtype=gs.tc_float)
         self.rew_buf = torch.zeros(self.num_envs, device=self.device, dtype=gs.tc_float)
         self.reset_buf = torch.ones(self.num_envs, device=self.device, dtype=gs.tc_int)
-        self.episode_length_buf = torch.zeros(
-            self.num_envs, device=self.device, dtype=gs.tc_int
-        )
-        self.time_out_buf = torch.zeros(
-            self.num_envs, device=self.device, dtype=gs.tc_int
-        )
+        self.episode_length_buf = torch.zeros(self.num_envs, device=self.device, dtype=gs.tc_int)
+        self.time_out_buf = torch.zeros(self.num_envs, device=self.device, dtype=gs.tc_int)
 
         if self.num_privileged_obs is not None:
             self.privileged_obs_buf = torch.zeros(

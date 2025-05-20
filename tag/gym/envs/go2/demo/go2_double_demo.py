@@ -31,18 +31,14 @@ class Go2DoubleDemo(LeggedRobot):
 
     def create_sim(self):
         self.scene = gs.Scene(
-            sim_options=gs.options.SimOptions(
-                dt=self.sim_dt, substeps=self.sim_substeps
-            ),
+            sim_options=gs.options.SimOptions(dt=self.sim_dt, substeps=self.sim_substeps),
             viewer_options=gs.options.ViewerOptions(
                 max_FPS=int(1 / self.dt * self.cfg.control.decimation),
                 camera_pos=(2.0, 0.0, 2.5),
                 camera_lookat=(0.0, 0.0, 0.5),
                 camera_fov=40,
             ),
-            vis_options=gs.options.VisOptions(
-                n_rendered_envs=min(self.cfg.viewer.num_rendered_envs, self.num_envs)
-            ),
+            vis_options=gs.options.VisOptions(n_rendered_envs=min(self.cfg.viewer.num_rendered_envs, self.num_envs)),
             rigid_options=gs.options.RigidOptions(
                 dt=self.sim_dt,
                 constraint_solver=gs.constraint_solver.Newton,
@@ -66,13 +62,9 @@ class Go2DoubleDemo(LeggedRobot):
         # add terrain
         mesh_type = self.cfg.terrain.mesh_type
         if mesh_type == "plane":
-            self.terrain = self.scene.add_entity(
-                gs.morphs.URDF(file="urdf/plane/plane.urdf", fixed=True)
-            )
+            self.terrain = self.scene.add_entity(gs.morphs.URDF(file="urdf/plane/plane.urdf", fixed=True))
         elif mesh_type is not None:
-            raise ValueError(
-                "Terrain mesh type not recognised. Allowed types are [None, plane, heightfield, trimesh]"
-            )
+            raise ValueError("Terrain mesh type not recognised. Allowed types are [None, plane, heightfield, trimesh]")
         self.terrain.set_friction(self.cfg.terrain.friction)
         self.terrain_x_range = torch.zeros(2, device=self.device)
         self.terrain_y_range = torch.zeros(2, device=self.device)
@@ -109,9 +101,7 @@ class Go2DoubleDemo(LeggedRobot):
         self._get_env_origins()
 
         # name to indices
-        self.motor_dofs = [
-            self.robot.get_joint(name).dof_idx_local for name in self.dof_names
-        ]
+        self.motor_dofs = [self.robot.get_joint(name).dof_idx_local for name in self.dof_names]
 
         # find link indices, termination links, penalized links, and feet
         def find_link_indices(names):
@@ -125,9 +115,7 @@ class Go2DoubleDemo(LeggedRobot):
                     link_indices.append(link.idx - self.robot.link_start)
             return link_indices
 
-        self.termination_indices = find_link_indices(
-            self.cfg.asset.terminate_after_contacts_on
-        )
+        self.termination_indices = find_link_indices(self.cfg.asset.terminate_after_contacts_on)
         all_link_names = [link.name for link in self.robot.links]
         print(f"all link names: {all_link_names}")
         print("termination link indices:", self.termination_indices)

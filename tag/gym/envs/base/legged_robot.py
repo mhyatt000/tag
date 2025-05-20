@@ -59,18 +59,14 @@ class LeggedRobot(BaseTask):
     # TODO: Complete implementation of create_sim() method in LeggedRobot
     def create_sim(self):
         self.scene = gs.Scene(
-            sim_options=gs.options.SimOptions(
-                dt=self.sim_dt, substeps=self.sim_substeps
-            ),
+            sim_options=gs.options.SimOptions(dt=self.sim_dt, substeps=self.sim_substeps),
             viewer_options=gs.options.ViewerOptions(
                 max_FPS=int(1 / self.dt * self.cfg.control.decimation),
                 camera_pos=(2.0, 0.0, 2.5),
                 camera_lookat=(0.0, 0.0, 0.5),
                 camera_fov=40,
             ),
-            vis_options=gs.options.VisOptions(
-                n_rendered_envs=min(self.cfg.viewer.num_rendered_envs, self.num_envs)
-            ),
+            vis_options=gs.options.VisOptions(n_rendered_envs=min(self.cfg.viewer.num_rendered_envs, self.num_envs)),
             rigid_options=gs.options.RigidOptions(
                 dt=self.sim_dt,
                 constraint_solver=gs.constraint_solver.Newton,
@@ -93,16 +89,12 @@ class LeggedRobot(BaseTask):
         # add terrain
         mesh_type = self.cfg.terrain.mesh_type
         if mesh_type == "plane":
-            self.terrain = self.scene.add_entity(
-                gs.morphs.URDF(file="urdf/plane/plane.urdf", fixed=True)
-            )
+            self.terrain = self.scene.add_entity(gs.morphs.URDF(file="urdf/plane/plane.urdf", fixed=True))
         # elif mesh_type=='heightfield':
         #    self.utils_terrain = Terrain(self.cfg.terrain)
         #    self._create_heightfield()
         elif mesh_type is not None:
-            raise ValueError(
-                "Terrain mesh type not recognised. Allowed types are [None, plane, heightfield, trimesh]"
-            )
+            raise ValueError("Terrain mesh type not recognised. Allowed types are [None, plane, heightfield, trimesh]")
         self.terrain.set_friction(self.cfg.terrain.friction)
         # specify the boundary of the heightfield
         self.terrain_x_range = torch.zeros(2, device=self.device)
@@ -171,70 +163,44 @@ class LeggedRobot(BaseTask):
         self.common_step_counter = 0
         self.extras = {}
         self.noise_scale_vec = self._get_noise_scale_vec(self.cfg)
-        self.forward_vec = torch.zeros(
-            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
-        )
+        self.forward_vec = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.forward_vec[:, 0] = 1.0
         self.base_init_pos = torch.tensor(self.cfg.init_state.pos, device=self.device)
         self.base_init_quat = torch.tensor(self.cfg.init_state.quat, device=self.device)
-        self.base_lin_vel = torch.zeros(
-            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        self.base_lin_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
+        self.base_ang_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
+        self.projected_gravity = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
+        self.global_gravity = torch.tensor([0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float).repeat(
+            self.num_envs, 1
         )
-        self.base_ang_vel = torch.zeros(
-            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
-        )
-        self.projected_gravity = torch.zeros(
-            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
-        )
-        self.global_gravity = torch.tensor(
-            [0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float
-        ).repeat(self.num_envs, 1)
-        self.obs_buf = torch.zeros(
-            (self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float
-        )
-        self.rew_buf = torch.zeros(
-            (self.num_envs,), device=self.device, dtype=gs.tc_float
-        )
-        self.reset_buf = torch.ones(
-            (self.num_envs,), device=self.device, dtype=gs.tc_int
-        )
-        self.episode_length_buf = torch.zeros(
-            (self.num_envs,), device=self.device, dtype=gs.tc_int
-        )
+        self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
+        self.rew_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
+        self.reset_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
+        self.episode_length_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_int)
         # self.commands = torch.zeros((self.num_envs, self.cfg.commands.num_commands), device=self.device, dtype=gs.tc_float)
         # self.commands_scale = torch.tensor([self.obs_scales.lin_vel, self.obs_scales.lin_vel, self.obs_scales.ang_vel],
         #    device=self.device,
         #    dtype=gs.tc_float,
         #    requires_grad=False,) # TODO change this
-        self.actions = torch.zeros(
-            (self.num_envs, self.num_actions), device=self.device, dtype=gs.tc_float
-        )
+        self.actions = torch.zeros((self.num_envs, self.num_actions), device=self.device, dtype=gs.tc_float)
         self.last_actions = torch.zeros_like(self.actions)
         self.dof_pos = torch.zeros_like(self.actions)
         self.dof_vel = torch.zeros_like(self.actions)
         self.last_dof_vel = torch.zeros_like(self.actions)
-        self.base_pos = torch.zeros(
-            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
-        )
-        self.base_quat = torch.zeros(
-            (self.num_envs, 4), device=self.device, dtype=gs.tc_float
-        )
+        self.base_pos = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
+        self.base_quat = torch.zeros((self.num_envs, 4), device=self.device, dtype=gs.tc_float)
         self.feet_air_time = torch.zeros(
             (self.num_envs, len(self.feet_indices)),
             device=self.device,
             dtype=gs.tc_float,
         )
-        self.last_contacts = torch.zeros(
-            (self.num_envs, len(self.feet_indices)), device=self.device, dtype=gs.tc_int
-        )
+        self.last_contacts = torch.zeros((self.num_envs, len(self.feet_indices)), device=self.device, dtype=gs.tc_int)
         self.link_contact_forces = torch.zeros(
             (self.num_envs, self.robot.n_links, 3),
             device=self.device,
             dtype=gs.tc_float,
         )
-        self.continuous_push = torch.zeros(
-            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
-        )
+        self.continuous_push = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.env_identities = torch.arange(
             self.num_envs,
             device=self.device,
@@ -250,10 +216,7 @@ class LeggedRobot(BaseTask):
         # self.measured_heights = 0
 
         self.default_dof_pos = torch.tensor(
-            [
-                self.cfg.init_state.default_joint_angles[name]
-                for name in self.cfg.asset.dof_names
-            ],
+            [self.cfg.init_state.default_joint_angles[name] for name in self.cfg.asset.dof_names],
             device=self.device,
             dtype=gs.tc_float,
         )
@@ -304,9 +267,7 @@ class LeggedRobot(BaseTask):
         self._get_env_origins()
 
         # name to indices
-        self.motor_dofs = [
-            self.robot.get_joint(name).dof_idx_local for name in self.dof_names
-        ]
+        self.motor_dofs = [self.robot.get_joint(name).dof_idx_local for name in self.dof_names]
 
         # find link indices, termination links, penalized links, and feet
         def find_link_indices(names):
@@ -320,9 +281,7 @@ class LeggedRobot(BaseTask):
                     link_indices.append(link.idx - self.robot.link_start)
             return link_indices
 
-        self.termination_indices = find_link_indices(
-            self.cfg.asset.terminate_after_contacts_on
-        )
+        self.termination_indices = find_link_indices(self.cfg.asset.terminate_after_contacts_on)
         all_link_names = [link.name for link in self.robot.links]
         print(f"all link names: {all_link_names}")
         print("termination link indices:", self.termination_indices)

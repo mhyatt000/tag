@@ -79,9 +79,7 @@ cam.start_recording()
 
 ### Movement
 for i in range(0, 2000):
-    target_pos_left = (
-        center + np.array([np.cos(i / 360 * np.pi), np.sin(i / 360 * np.pi), 0]) * r
-    )
+    target_pos_left = center + np.array([np.cos(i / 360 * np.pi), np.sin(i / 360 * np.pi), 0]) * r
     target_pos_right = target_pos_left + np.array([0.0, 0.03, 0])
 
     target_left.set_qpos(np.concatenate([target_pos_left, target_quat]))
