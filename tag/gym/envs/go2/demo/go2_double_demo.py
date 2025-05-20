@@ -8,16 +8,16 @@ import torch
 
 from tag.gym.envs.base.legged_robot import LeggedRobot
 
-from .go2_demo_config import Go2DemoCfg
+from .confgi import Go2DemoEnv
 
 
 class Go2DoubleDemo(LeggedRobot):
-    cfg: Go2DemoCfg
+    cfg: Go2DemoEnv
     height_samples: Optional[torch.Tensor]
     debug_viz: bool
     init_done: bool
 
-    def __init__(self, cfg: Go2DemoCfg, sim_device, headless):
+    def __init__(self, cfg: Go2DemoEnv, sim_device, headless):
         self.cfg = cfg
         self.height_samples = None
         self.debug_viz = self.cfg.env.debug_viz
@@ -30,6 +30,8 @@ class Go2DoubleDemo(LeggedRobot):
         self.init_done = True
 
     def create_sim(self):
+        # TODO(dle) this looks like duplicate code from parent class
+        # remove?
         self.scene = gs.Scene(
             sim_options=gs.options.SimOptions(dt=self.sim_dt, substeps=self.sim_substeps),
             viewer_options=gs.options.ViewerOptions(

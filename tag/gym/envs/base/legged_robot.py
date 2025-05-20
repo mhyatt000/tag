@@ -1,12 +1,12 @@
 import os
-from typing import Optional
+from typing import Literal, Optional
 
 import genesis as gs
 from genesis.engine.solvers.rigid.rigid_solver_decomp import RigidSolver
+from gym.envs.base.base_task import BaseTask
 import numpy as np
 import torch
 
-from gym.envs.base.base_task import BaseTask
 from tag.gym import GYM_ROOT_DIR
 
 from .legged_robot_config import LeggedRobotCfg
@@ -163,6 +163,24 @@ class LeggedRobot(BaseTask):
         self.common_step_counter = 0
         self.extras = {}
         self.noise_scale_vec = self._get_noise_scale_vec(self.cfg)
+
+        # TODO(dle) use helpers to be concise/DRY
+        def _buf(shape, fill: Literal[0, 1], dtype):
+            fill = torch.zeros if fill == 0 else torch.ones
+            return fill(shape, device=self.device, dtype=dtype)
+
+        def buf_float(shape, fill: Literal[0, 1]):
+            return torch.zeros(shape, device=self.device, dtype=gs.tc_float)
+
+        def buf_int(shape):
+            return torch.zeros(shape, device=self.device, dtype=gs.tc_int)
+
+        # TODO(dle) like this
+        self.forward_vec = buf_float((self.num_envs, 3), 0)
+        self.forward_vec[:, 0] = 1.0
+        # ...
+        self.base_lin_vel = buf_float((self.num_envs, 3), 0)
+
         self.forward_vec = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
         self.forward_vec[:, 0] = 1.0
         self.base_init_pos = torch.tensor(self.cfg.init_state.pos, device=self.device)

@@ -2,12 +2,11 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Optional
 
-import genesis as gs
 import torch
 
 
 @dataclass
-class BaseTask(ABC):
+class TaskConfig:
     render_fps: int = field(init=False)
     last_frame_time: int = field(init=False)
     num_envs: int = field(init=False)
@@ -19,60 +18,58 @@ class BaseTask(ABC):
     num_privileged_obs: int = field(init=False)
     num_actions: int = field(init=False)
 
-    # Buffers
-    obs_buf: torch.Tensor = field(init=False)
-    rew_buf: torch.Tensor = field(init=False)
-    reset_buf: torch.Tensor = field(init=False)
-    episode_length_buf: torch.Tensor = field(init=False)
-    time_out_buf: torch.Tensor = field(init=False)
-    privileged_obs_buf: Optional[torch.Tensor] = field(init=False)
+
+@dataclass
+class Buffer:  # TODO(dle) init them
+    obs: torch.Tensor
+    rew: torch.Tensor
+    reset: torch.Tensor
+    episode_length: torch.Tensor
+    time_out: torch.Tensor
+    privileged_obs: Optional[torch.Tensor]
+
+
+@dataclass
+class BaseTask(ABC):
     extras: dict = field(init=False)
 
-    def __init__(self, cfg, sim_device, headless: bool = False):
+    def __init__(self, cfg, taskconfig, headless: bool = False):
+        # TODO(dle) what type is cfg
+
         self.render_fps = 50
         self.last_frame_time = 0
         self.num_envs = 1 if cfg.env.num_envs == 0 else cfg.env.num_envs
         self.headless = headless
-        if not torch.cuda.is_available():
-            self.device = torch.device("cpu")
-        else:
-            assert sim_device in ["cpu", "cuda"]
-            self.device = torch.device("gpu")
 
-        self.num_build_envs = self.num_envs
-        self.num_obs = cfg.env.num_observations
-        self.num_privileged_obs = cfg.env.num_privileged_obs
-        self.num_actions = cfg.env.num_actions
+        cuda = torch.cuda.is_available()
+        self.device = torch.device("gpu" if cuda else "cpu")
 
-        self.obs_buf = torch.zeros(self.num_envs, self.num_obs, device=self.device, dtype=gs.tc_float)
-        self.rew_buf = torch.zeros(self.num_envs, device=self.device, dtype=gs.tc_float)
-        self.reset_buf = torch.ones(self.num_envs, device=self.device, dtype=gs.tc_int)
-        self.episode_length_buf = torch.zeros(self.num_envs, device=self.device, dtype=gs.tc_int)
-        self.time_out_buf = torch.zeros(self.num_envs, device=self.device, dtype=gs.tc_int)
+        # TODO(dle) cleanup.
+        # num_obs num_actions is unique to env. cant be passed in
+        self.num_build_envs = self.num_envs  # gs is natively vectorized
+        # self.num_obs = cfg.env.num_observations
+        # self.num_privileged_obs = cfg.env.num_privileged_obs
+        # self.num_actions = cfg.env.num_actions
 
-        if self.num_privileged_obs is not None:
-            self.privileged_obs_buf = torch.zeros(
-                self.num_envs,
-                self.num_privileged_obs,
-                device=self.device,
-                dtype=gs.tc_float,
-            )
-        else:
-            self.privileged_obs_buf = None
-
+        # ignore privileged obs for now
+        # TODO(dle) fix buffer class
+        # p = self.num_privileged_obs
+        self.buffer = Buffer()  # init buffer
         self.extras = dict()
 
         self.create_sim()
 
     @abstractmethod
-    def get_observations(self):
+    def get_observations(self, privileged: bool = False):
         pass
 
-    @abstractmethod
-    def get_privledged_observations(self):
-        pass
+    # (mhyatt) personal preference to use one method for obs
+    # @abstractmethod
+    # def get_privledged_observations(self):
+    # pass
 
     def reset_idx(self, env_ids):
+        # (mhyatt) how is this different from reset?
         pass
 
     @abstractmethod
