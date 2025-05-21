@@ -43,6 +43,7 @@ def main(args):
 			dofs_idx_local = env.cfg.robotCfg.asset.local_dofs,
 			envs_idx = torch.tensor([0], device = gs.gpu)
 		)
+		# TODO: Implement Progress Bar?
 		env.step()
 
 	env.end()
