@@ -9,6 +9,8 @@ import torch
 from tqdm import tqdm
 import tyro
 
+from env import EnvConfig, Stack
+
 
 @dataclass
 class RunCN:
@@ -17,7 +19,7 @@ class RunCN:
 
     ## camera params
     gui: bool = False
-    record: bool = False
+    record: bool = True
     fov: float = 40.0  # field of view
 
     # gs.cpu gs.cuda, gs.vulkan or gs.metal
@@ -38,15 +40,13 @@ env_ids
 
 """
 
-from env import EnvConfig, Stack
-
 
 def main(cfg: RunCN):
     pprint(cfg)
 
     gs.init(backend=cfg.backend)
 
-    env = Stack(EnvConfig(gui=False, show_viewer=True))
+    env = Stack(EnvConfig(show_viewer=False))
     # env =  Stack(EnvConfig())
 
     dic = [
@@ -178,24 +178,24 @@ def main(cfg: RunCN):
     dic = OrderedDict(dic)
     joints = dic["robot0_joint_pos"]
 
-    """
-    ############## add terrain ##############
-    size_x, size_y = 9, 9
-    step_height = 15.0
-    step_width = 3
+    
+    # ############## add terrain ##############
+    # size_x, size_y = 9, 9
+    # step_height = 15.0
+    # step_width = 3
 
-    height_field = np.zeros((size_x, size_y))
+    # height_field = np.zeros((size_x, size_y))
 
-    for i in range(0, size_x, step_width):
-        height_field[i : i + step_width, :] = (i // step_width) * step_height
+    # for i in range(0, size_x, step_width):
+    #     height_field[i : i + step_width, :] = (i // step_width) * step_height
 
-    height_field[step_width::step_width, :] = (
-        height_field[step_width::step_width, :] - step_height
-    )
-    scene.add_entity(
-        gs.morphs.Terrain(height_field=height_field, pos=(-1.0, -10.0, 0.0)),
-    )
-    """
+    # height_field[step_width::step_width, :] = (
+    #     height_field[step_width::step_width, :] - step_height
+    # )
+    # env.scene.add_entity(
+    #     gs.morphs.Terrain(height_field=height_field, pos=(-1.0, -10.0, 0.0)),
+    # )
+
 
     # franka = scene.add_entity( gs.morphs.MJCF(file="xml/franka_emika_panda/panda.xml"),)
 
@@ -222,44 +222,27 @@ def main(cfg: RunCN):
 
     """
 
+    cam = env.scene.add_camera(
+        res = (640, 480),
+        pos = (0, 1, 0.75),
+        lookat = (0.0, 0.0, 0.5),
+        fov = 40,
+        GUI = False
+    )
+
     env.build()
-    env.robot.reset()  # set torque init pos
 
     # if cfg.record:
-    # cam.start_recording()
-
-    eef = env.robot.eef
-    robot = env.robot.robot
+    cam.start_recording()
 
     up_quat = (np.array([0.7071068, 0, 0, 0.7071068]),)
-
-    qpos1 = robot.inverse_kinematics(
-        link=eef,
-        pos=env.cubea.get_pos() + torch.tensor([0, 0, 0.25]),
-        quat=np.array([0, 0, 1, 0]),
-    )
-    qpos2 = robot.inverse_kinematics(
-        link=eef,
-        pos=env.cubea.get_pos() + torch.tensor([0, 0, 0.2]),
-        quat=np.array([0, 0, 1, 0]),
-    )
-    qpos3 = robot.inverse_kinematics(
-        link=eef,
-        pos=env.cubeb.get_pos() + torch.tensor([0, 0, 0.25]),
-        quat=np.array([0, 0, 1, 0]),
-    )
 
     # gripper open pos
     # qpos[-2:] = 0.04
     n = 50
 
-    qpos0 = torch.zeros_like(qpos1)
-    qpos0[: joints.shape[0]] = torch.Tensor(joints)
-
-    env.robot.act(joints, mode="set")
     env.step()
-
-    print(robot.get_qpos())
+    cam.render()
 
     def close(qpos):
         qpos = qpos.clone()
@@ -271,32 +254,24 @@ def main(cfg: RunCN):
         qpos[-2:] = 0.0
         return qpos
 
-    pairs = [
-        (qpos0, qpos1, env.robot.open),
-        (qpos1, qpos2, env.robot.open),
-        (qpos2, qpos2, env.robot.close),
-        (qpos2, qpos3, env.robot.close),
-        (qpos3, qpos3, env.robot.open),
-    ]
-    for a, b, grip in pairs:
-        path = robot.plan_path(
-            qpos_start=a,
-            qpos_goal=b,
-            num_waypoints=n,
-        )
-        for waypoint in path:
-            env.robot.act(waypoint[:7])
-            grip()
-            env.step()
-            # env.render(names=["bird", "wrist_hi", "wrist_lo"])
-
-    for _ in tqdm(range(50)):
+    for t in range(200): # 2 seconds
         env.step()
+        cam.set_pose(
+            pos    = (3.5 * np.sin(t / 60), 3.5 * np.cos(t / 60), 0.75),
+            lookat = (0, 0, 0.5),
+        )
+        cam.render()
+    # for _ in tqdm(range(50)):
+    #     env.step()
+    #     cam.render()
+
+    cam.stop_recording(save_to_filename = "./blocktest.mp4", fps = 30)
+
     quit()
 
-    for i in tqdm(range(int(100))):
-        things = env.step(None)
-        env.render(names=["bird", "wrist_hi", "wrist_lo"])
+    # for i in tqdm(range(int(100))):
+    #     things = env.step(None)
+    #     env.render(names=["bird", "wrist_hi", "wrist_lo"])
 
         # cam.set_pose(
         # pos=(3.0 * np.sin(i / 60), 3.0 * np.cos(i / 60), 2.5),
