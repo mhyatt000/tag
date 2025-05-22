@@ -12,6 +12,7 @@ dependencies = [
     "mediapy>=1.2.2",
     "pytest>=8.3.5",
     "rich>=14.0.0",
+    "scipy==1.13.1",
     "tqdm>=4.67.1",
     "tyro>=0.9.20",
     "wandb>=0.19.11",
@@ -27,6 +28,7 @@ brax = [
 genesis = [
     "genesis-lr",
     "genesis-world>=0.2.1",
+    "open3d>=0.19.0",
     "rsl-rl",
     "tensorboard>=2.19.0",
     "torch>=2.0.1",
