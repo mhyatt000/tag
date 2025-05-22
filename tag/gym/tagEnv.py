@@ -62,16 +62,14 @@ class TagEnv(BaseEnv):
         self.robot_1 = self.scene.add_entity(
             gs.morphs.URDF(
                 file=cfg.robotCfg.asset.file,
-                pos=torch.tensor(cfg.robotCfg.init_state.pos)
-                + torch.tensor([0.0, -0.5, 0.0]),
+                pos=torch.tensor(cfg.robotCfg.init_state.pos) + torch.tensor([0.0, -0.5, 0.0]),
             )
         )
 
         self.robot_2 = self.scene.add_entity(
             gs.morphs.URDF(
                 file=cfg.robotCfg.asset.file,
-                pos=torch.tensor(cfg.robotCfg.init_state.pos)
-                + torch.tensor([0.0, 0.5, 0.0]),
+                pos=torch.tensor(cfg.robotCfg.init_state.pos) + torch.tensor([0.0, 0.5, 0.0]),
             )
         )
 
@@ -100,9 +98,7 @@ class TagEnv(BaseEnv):
     # TODO: Properly Implement Step Method - Actions, Updates, etc.
     def step(
         self, actions: torch.Tensor = None
-    ) -> Tuple[
-        torch.Tensor, Union[torch.Tensor, None], torch.Tensor, torch.Tensor, Dict
-    ]:
+    ) -> Tuple[torch.Tensor, Union[torch.Tensor, None], torch.Tensor, torch.Tensor, Dict]:
         """Iterate one step in timespace and updates environment
 
         Args:
@@ -120,7 +116,7 @@ class TagEnv(BaseEnv):
 
         # Execute actions
 
-        for k,act in actions.items():
+        for k, act in actions.items():
             self.robots[k].act(act)
 
         self.scene.step()
@@ -138,7 +134,7 @@ class TagEnv(BaseEnv):
 
         obs = self.get_observations()
         reward = self.get_reward()
-        return obs,reward term, trunc, info
+        return obs, reward, term, trunc, info
 
     # TODO: Implement Reset Method
     def reset(self) -> Tuple[torch.Tensor, Dict]:
@@ -147,9 +143,7 @@ class TagEnv(BaseEnv):
         Returns:
             Tuple[torch.Tensor, Dict]: A Tuple of the Reset Buffer and any Extras
         """
-        self.reset_buf[:] = torch.ones(
-            (self.n_envs,), device=self.device, dtype=gs.tc_int
-        )
+        self.reset_buf[:] = torch.ones((self.n_envs,), device=self.device, dtype=gs.tc_int)
         return self.reset_buf, None
 
     # TODO: Review
@@ -178,14 +172,10 @@ class TagEnv(BaseEnv):
 
     def record_data(self):
         if self.cfg.vis.visualized:
-            self.cam.stop_recording(
-                save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60
-            )
+            self.cam.stop_recording(save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60)
 
     def _init_buffers(self):
-        self.obs_buf = torch.zeros(
-            (self.n_envs, self.num_obs), device=self.device, dtype=gs.tc_float
-        )
+        self.obs_buf = torch.zeros((self.n_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
         self.privileged_obs_buf = (
             None
             if self.num_privileged_obs is None
@@ -196,12 +186,8 @@ class TagEnv(BaseEnv):
             )
         )
         self.reset_buf = torch.ones((self.n_envs,), device=self.device, dtype=gs.tc_int)
-        self.rew_buf = torch.zeros(
-            (self.n_envs,), device=self.device, dtype=gs.tc_float
-        )
-        self.episode_length_buf = torch.zeros(
-            (self.n_envs,), device=self.device, dtype=gs.tc_int
-        )
+        self.rew_buf = torch.zeros((self.n_envs,), device=self.device, dtype=gs.tc_float)
+        self.episode_length_buf = torch.zeros((self.n_envs,), device=self.device, dtype=gs.tc_int)
 
         # TODO: Implement buffer initialization for Go2 Models once Robot class is implemented
         # self.base_lin_vel = torch.zeros((self.n_envs, 3), device=gs.device, dtype=gs.tc_float)

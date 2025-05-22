@@ -1,4 +1,3 @@
-import genesis as gs
 import torch
 
 from tag.gym.base.config import RobotConfig

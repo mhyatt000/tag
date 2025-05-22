@@ -80,7 +80,8 @@ ignore = [
   "E731",  # do not assign lambda
   "E722",  # do not use bare except
   "E402",  # module import not at top of file
-  "E501"  # line too long
+  "E501",  # line too long
+  "E741", # ambiguous variable name
 ]
 
 

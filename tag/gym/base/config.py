@@ -1,14 +1,12 @@
 from dataclasses import dataclass, field
 
-from rich.pretty import pprint
-import tyro
-
 
 def default(x):
     return field(default_factory=lambda: x)
 
 
 # Environment Arguments
+
 
 # TODO: Paintable/Randomized Terrain Implementation
 @dataclass
@@ -40,12 +38,14 @@ class Vis:
 class Solver:
     collision: bool = True
     joint_limit: bool = True
-    dt: float = 0.02 # 50hz robot step
+    dt: float = 0.02  # 50hz robot step
+
 
 @dataclass
 class Sim:
-    dt: int = 0.01 # 100hz sim step physics
+    dt: int = 0.01  # 100hz sim step physics
     num_envs: int = 1
+
 
 @dataclass
 class Task:
@@ -55,7 +55,9 @@ class Task:
     num_obs: int = 20  # arb
     num_privileged_obs: int = 10  # arb
 
+
 # Robot Configs
+
 
 @dataclass
 class InitState:
@@ -73,6 +75,7 @@ class InitState:
 
     # TODO(dle) random stiffness dampening
 
+
 @dataclass
 class State:
     base_pos: list[float] = default([0.0, 0.0, 0.42])  # base link position
@@ -83,18 +86,18 @@ class State:
 
 @dataclass
 class Control:
-    kp: float 
+    kp: float
     kd: float
     control_type: str = "P"
-    action_scale: float = 0.5 # TODO(dle) add example in docstring
+    action_scale: float = 0.5  # TODO(dle) add example in docstring
     decimation: float = 4
     latency: bool = False
 
 
 @dataclass
 class Asset:
-    file: str 
-    local_dofs: list[int] 
+    file: str
+    local_dofs: list[int]
 
 
 @dataclass
@@ -117,4 +120,3 @@ class EnvConfig:
 
 
 # IMPLEMENT: Configurations for Tasks/Rewards/Observations
-

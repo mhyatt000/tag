@@ -1,5 +1,4 @@
 import os
-import subprocess
 
 from rich.pretty import pprint
 from tqdm import tqdm
@@ -44,48 +43,41 @@ except Exception as e:
 
 print("Installation successful.")
 
-import itertools
-import time
-from typing import Callable, List, NamedTuple, Optional, Union
+from typing import List
 
 import matplotlib.pyplot as plt
+
 # Graphics and plotting.
-import mediapy as media
 import numpy as np
 
 # More legible printing from numpy.
 np.set_printoptions(precision=3, suppress=True, linewidth=100)
 
-import functools
 from datetime import datetime
-from typing import Any, Dict, Sequence, Tuple, Union
+import functools
+from typing import Any, Sequence
 
-import jax
-import mediapy as media
-import mujoco
-import numpy as np
 from brax import base, envs, math
-from brax.base import Base, Motion, Transform
-from brax.envs.base import Env, PipelineEnv, State
-from brax.io import html, mjcf, model
-from brax.mjx.base import State as MjxState
+from brax.base import Motion, Transform
+from brax.envs.base import PipelineEnv, State
+from brax.io import html, model
 from brax.training.agents.ppo import networks as ppo_networks
 from brax.training.agents.ppo import train as ppo
 from etils import epath
-from flax import struct
+import jax
 from jax import numpy as jp
-from matplotlib import pyplot as plt
 from ml_collections import config_dict
-from mujoco import mjx
+import mujoco
+import numpy as np
 
 """# Introduction
-This notebook trains a joystick policy on the 
-[Barkour v0 Quadruped]. 
-We train the policy using Brax and MJX. 
+This notebook trains a joystick policy on the
+[Barkour v0 Quadruped].
+We train the policy using Brax and MJX.
 Visit the [MJX tutorial notebook] for more info.
 
 ## Quadruped Env
-Let's define a quadruped environment that takes advantage of the domain randomization function. 
+Let's define a quadruped environment that takes advantage of the domain randomization function.
 Here we use the Barkour v0 Quadruped from [MuJoCo Menagerie].
 """
 
@@ -154,12 +146,11 @@ def get_config():
 
 
 import copy
-from copy import deepcopy
 
 
 def duplicate_robot(cfg, robot_prefix="robot", robot_idx=1, offset=(0, 0, 0)):
     new = copy.deepcopy(cfg)
-    pprint(new.__dict__)  
+    pprint(new.__dict__)
 
     suffix = f"_{robot_idx}"
 
@@ -232,9 +223,7 @@ class BarkourEnv(PipelineEnv):
             if k.endswith("_scale"):
                 self.reward_config.rewards.scales[k[:-6]] = v
 
-        self._torso_idx = mujoco.mj_name2id(
-            sys.mj_model, mujoco.mjtObj.mjOBJ_BODY.value, "chassis"
-        )
+        self._torso_idx = mujoco.mj_name2id(sys.mj_model, mujoco.mjtObj.mjOBJ_BODY.value, "chassis")
         self._action_scale = action_scale
         self._obs_noise = obs_noise
         self._kick_vel = kick_vel
@@ -248,10 +237,7 @@ class BarkourEnv(PipelineEnv):
             "foot_front_right",
             "foot_hind_right",
         ]
-        feet_site_id = [
-            mujoco.mj_name2id(sys.mj_model, mujoco.mjtObj.mjOBJ_SITE.value, f)
-            for f in feet_site
-        ]
+        feet_site_id = [mujoco.mj_name2id(sys.mj_model, mujoco.mjtObj.mjOBJ_SITE.value, f) for f in feet_site]
         assert not any(id_ == -1 for id_ in feet_site_id), "Site not found."
         self._feet_site_id = np.array(feet_site_id)
         lower_leg_body = [
@@ -260,10 +246,7 @@ class BarkourEnv(PipelineEnv):
             "lower_leg_1to1_hind_right",
             "lower_leg_1to1_hind_left",
         ]
-        lower_leg_body_id = [
-            mujoco.mj_name2id(sys.mj_model, mujoco.mjtObj.mjOBJ_BODY.value, l)
-            for l in lower_leg_body
-        ]
+        lower_leg_body_id = [mujoco.mj_name2id(sys.mj_model, mujoco.mjtObj.mjOBJ_BODY.value, l) for l in lower_leg_body]
         assert not any(id_ == -1 for id_ in lower_leg_body_id), "Body not found."
         self._lower_leg_body_id = np.array(lower_leg_body_id)
         self._foot_radius = 0.014
@@ -275,15 +258,9 @@ class BarkourEnv(PipelineEnv):
         ang_vel_yaw = [-0.7, 0.7]  # min max [rad/s]
 
         _, key1, key2, key3 = jax.random.split(rng, 4)
-        lin_vel_x = jax.random.uniform(
-            key1, (1,), minval=lin_vel_x[0], maxval=lin_vel_x[1]
-        )
-        lin_vel_y = jax.random.uniform(
-            key2, (1,), minval=lin_vel_y[0], maxval=lin_vel_y[1]
-        )
-        ang_vel_yaw = jax.random.uniform(
-            key3, (1,), minval=ang_vel_yaw[0], maxval=ang_vel_yaw[1]
-        )
+        lin_vel_x = jax.random.uniform(key1, (1,), minval=lin_vel_x[0], maxval=lin_vel_x[1])
+        lin_vel_y = jax.random.uniform(key2, (1,), minval=lin_vel_y[0], maxval=lin_vel_y[1])
+        ang_vel_yaw = jax.random.uniform(key3, (1,), minval=ang_vel_yaw[0], maxval=ang_vel_yaw[1])
         new_cmd = jp.array([lin_vel_x[0], lin_vel_y[0], ang_vel_yaw[0]])
         return new_cmd
 
@@ -310,14 +287,10 @@ class BarkourEnv(PipelineEnv):
         metrics = {"total_dist": 0.0}
         for k in state_info["rewards"]:
             metrics[k] = state_info["rewards"][k]
-        state = State(
-            pipeline_state, obs, reward, done, metrics, state_info
-        )  # pytype: disable=wrong-arg-types
+        state = State(pipeline_state, obs, reward, done, metrics, state_info)  # pytype: disable=wrong-arg-types
         return state
 
-    def step(
-        self, state: State, action: jax.Array
-    ) -> State:  # pytype: disable=signature-mismatch
+    def step(self, state: State, action: jax.Array) -> State:  # pytype: disable=signature-mismatch
         rng, cmd_rng, kick_noise_2 = jax.random.split(state.info["rng"], 3)
 
         # kick
@@ -341,9 +314,7 @@ class BarkourEnv(PipelineEnv):
         joint_vel = pipeline_state.qd[6:]
 
         # foot contact data based on z-position
-        foot_pos = pipeline_state.site_xpos[
-            self._feet_site_id
-        ]  # pytype: disable=attribute-error
+        foot_pos = pipeline_state.site_xpos[self._feet_site_id]  # pytype: disable=attribute-error
         foot_contact_z = foot_pos[:, 2] - self._foot_radius
         contact = foot_contact_z < 1e-3  # a mm or less off the floor
         contact_filt_mm = contact | state.info["last_contact"]
@@ -360,18 +331,12 @@ class BarkourEnv(PipelineEnv):
 
         # reward
         rewards = {
-            "tracking_lin_vel": (
-                self._reward_tracking_lin_vel(state.info["command"], x, xd)
-            ),
-            "tracking_ang_vel": (
-                self._reward_tracking_ang_vel(state.info["command"], x, xd)
-            ),
+            "tracking_lin_vel": (self._reward_tracking_lin_vel(state.info["command"], x, xd)),
+            "tracking_ang_vel": (self._reward_tracking_ang_vel(state.info["command"], x, xd)),
             "lin_vel_z": self._reward_lin_vel_z(xd),
             "ang_vel_xy": self._reward_ang_vel_xy(xd),
             "orientation": self._reward_orientation(x),
-            "torques": self._reward_torques(
-                pipeline_state.qfrc_actuator
-            ),  # pytype: disable=attribute-error
+            "torques": self._reward_torques(pipeline_state.qfrc_actuator),  # pytype: disable=attribute-error
             "action_rate": self._reward_action_rate(action, state.info["last_act"]),
             "stand_still": self._reward_stand_still(
                 state.info["command"],
@@ -385,9 +350,7 @@ class BarkourEnv(PipelineEnv):
             "foot_slip": self._reward_foot_slip(pipeline_state, contact_filt_cm),
             "termination": self._reward_termination(done, state.info["step"]),
         }
-        rewards = {
-            k: v * self.reward_config.rewards.scales[k] for k, v in rewards.items()
-        }
+        rewards = {k: v * self.reward_config.rewards.scales[k] for k, v in rewards.items()}
         reward = jp.clip(sum(rewards.values()) * self.dt, 0.0, 10000.0)
 
         # state management
@@ -407,18 +370,14 @@ class BarkourEnv(PipelineEnv):
             state.info["command"],
         )
         # reset the step counter when done
-        state.info["step"] = jp.where(
-            done | (state.info["step"] > 500), 0, state.info["step"]
-        )
+        state.info["step"] = jp.where(done | (state.info["step"] > 500), 0, state.info["step"])
 
         # log total displacement as a proxy metric
         state.metrics["total_dist"] = math.normalize(x.pos[self._torso_idx - 1])[1]
         state.metrics.update(state.info["rewards"])
 
         done = jp.float32(done)
-        state = state.replace(
-            pipeline_state=pipeline_state, obs=obs, reward=reward, done=done
-        )
+        state = state.replace(pipeline_state=pipeline_state, obs=obs, reward=reward, done=done)
         return state
 
     def _get_obs(
@@ -472,33 +431,23 @@ class BarkourEnv(PipelineEnv):
         # Penalize changes in actions
         return jp.sum(jp.square(act - last_act))
 
-    def _reward_tracking_lin_vel(
-        self, commands: jax.Array, x: Transform, xd: Motion
-    ) -> jax.Array:
+    def _reward_tracking_lin_vel(self, commands: jax.Array, x: Transform, xd: Motion) -> jax.Array:
         # Tracking of linear velocity commands (xy axes)
         local_vel = math.rotate(xd.vel[0], math.quat_inv(x.rot[0]))
         lin_vel_error = jp.sum(jp.square(commands[:2] - local_vel[:2]))
-        lin_vel_reward = jp.exp(
-            -lin_vel_error / self.reward_config.rewards.tracking_sigma
-        )
+        lin_vel_reward = jp.exp(-lin_vel_error / self.reward_config.rewards.tracking_sigma)
         return lin_vel_reward
 
-    def _reward_tracking_ang_vel(
-        self, commands: jax.Array, x: Transform, xd: Motion
-    ) -> jax.Array:
+    def _reward_tracking_ang_vel(self, commands: jax.Array, x: Transform, xd: Motion) -> jax.Array:
         # Tracking of angular velocity commands (yaw)
         base_ang_vel = math.rotate(xd.ang[0], math.quat_inv(x.rot[0]))
         ang_vel_error = jp.square(commands[2] - base_ang_vel[2])
         return jp.exp(-ang_vel_error / self.reward_config.rewards.tracking_sigma)
 
-    def _reward_feet_air_time(
-        self, air_time: jax.Array, first_contact: jax.Array, commands: jax.Array
-    ) -> jax.Array:
+    def _reward_feet_air_time(self, air_time: jax.Array, first_contact: jax.Array, commands: jax.Array) -> jax.Array:
         # Reward air time.
         rew_air_time = jp.sum((air_time - 0.1) * first_contact)
-        rew_air_time *= (
-            math.normalize(commands[:2])[1] > 0.05
-        )  # no reward for zero command
+        rew_air_time *= math.normalize(commands[:2])[1] > 0.05  # no reward for zero command
         return rew_air_time
 
     def _reward_stand_still(
@@ -507,13 +456,9 @@ class BarkourEnv(PipelineEnv):
         joint_angles: jax.Array,
     ) -> jax.Array:
         # Penalize motion at zero commands
-        return jp.sum(jp.abs(joint_angles - self._default_pose)) * (
-            math.normalize(commands[:2])[1] < 0.1
-        )
+        return jp.sum(jp.abs(joint_angles - self._default_pose)) * (math.normalize(commands[:2])[1] < 0.1)
 
-    def _reward_foot_slip(
-        self, pipeline_state: base.State, contact_filt: jax.Array
-    ) -> jax.Array:
+    def _reward_foot_slip(self, pipeline_state: base.State, contact_filt: jax.Array) -> jax.Array:
         # get velocities at feet which are offset from lower legs
         # pytype: disable=attribute-error
         pos = pipeline_state.site_xpos[self._feet_site_id]  # feet position
@@ -529,9 +474,7 @@ class BarkourEnv(PipelineEnv):
     def _reward_termination(self, done: jax.Array, step: jax.Array) -> jax.Array:
         return done & (step < 500)
 
-    def render(
-        self, trajectory: List[base.State], camera: str | None = None
-    ) -> Sequence[np.ndarray]:
+    def render(self, trajectory: List[base.State], camera: str | None = None) -> Sequence[np.ndarray]:
         camera = camera or "track"
         return super().render(trajectory, camera=camera)
 
@@ -551,10 +494,7 @@ def domain_randomize(sys, rng):
         # actuator
         _, key = jax.random.split(key, 2)
         gain_range = (-5, 5)
-        param = (
-            jax.random.uniform(key, (1,), minval=gain_range[0], maxval=gain_range[1])
-            + sys.actuator_gainprm[:, 0]
-        )
+        param = jax.random.uniform(key, (1,), minval=gain_range[0], maxval=gain_range[1]) + sys.actuator_gainprm[:, 0]
         gain = sys.actuator_gainprm.at[:, 0].set(param)
         bias = sys.actuator_biasprm.at[:, 1].set(-param)
         return friction, gain, bias
@@ -585,9 +525,9 @@ env_name = "barkour"
 env = envs.get_environment(env_name)
 
 """## Train Policy
-To train a policy with domain randomization, 
-we pass in the domain randomization function into the brax train function; 
-brax will call the domain randomization function when rolling out episodes. 
+To train a policy with domain randomization,
+we pass in the domain randomization function into the brax train function;
+brax will call the domain randomization function when rolling out episodes.
 Training the quadruped takes 6 minutes on a Tesla A100 GPU.
 """
 
@@ -654,9 +594,7 @@ def progress(num_steps, metrics):
 # domain randomization function.
 env = envs.get_environment(env_name)
 eval_env = envs.get_environment(env_name)
-make_inference_fn, params, _ = train_fn(
-    environment=env, progress_fn=progress, eval_env=eval_env
-)
+make_inference_fn, params, _ = train_fn(environment=env, progress_fn=progress, eval_env=eval_env)
 
 print(f"time to jit: {times[1] - times[0]}")
 print(f"time to train: {times[-1] - times[1]}")
@@ -670,9 +608,9 @@ inference_fn = make_inference_fn(params)
 jit_inference_fn = jax.jit(inference_fn)
 
 """## Visualize Policy
-For the Barkour Quadruped, 
+For the Barkour Quadruped,
 the joystick commands can be set:
-`x_vel`, `y_vel` define the linear forward and sideways vel with wrt quadruped torso. 
+`x_vel`, `y_vel` define the linear forward and sideways vel with wrt quadruped torso.
 `ang_vel` defines the angular velocity of the torso in the z direction.
 """
 

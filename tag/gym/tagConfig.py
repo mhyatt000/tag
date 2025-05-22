@@ -1,10 +1,19 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from rich.pretty import pprint
-
-from tag.gym.base.config import (Asset, Control, EnvConfig, InitState,
-                                 RobotConfig, Sim, Solver, Task, Terrain,
-                                 Viewer, Vis, default)
+from tag.gym.base.config import (
+    Asset,
+    Control,
+    EnvConfig,
+    InitState,
+    RobotConfig,
+    Sim,
+    Solver,
+    Task,
+    Terrain,
+    Viewer,
+    Vis,
+    default,
+)
 
 
 @dataclass
@@ -51,6 +60,7 @@ class Go2EnvConfig(EnvConfig):
 
 
 # --- Task Environments ---
+
 
 class TagConfig(Go2Config):
     task: Task = default(Task())
