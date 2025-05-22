@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "genesis-world>=0.2.1",
     "gymnasium>=1.1.1",
+    "libigl[genesis]==2.5.1",
     "matplotlib>=3.10.1",
     "mediapy>=1.2.2",
     "pytest>=8.3.5",
@@ -43,6 +44,10 @@ dev = [
     "pre-commit>=4.2.0",
 ]
 
+[tool.setuptools]
+packages = ["tag"]
+
+
 [tool.uv.sources]
 genesis-lr = { git = "https://github.com/lupinjia/genesis_lr" }
 rsl-rl = { git = "https://github.com/leggedrobotics/rsl_rl", rev = "v1.0.2" }
@@ -75,7 +80,8 @@ ignore = [
   "E731",  # do not assign lambda
   "E722",  # do not use bare except
   "E402",  # module import not at top of file
-  "E501"  # line too long
+  "E501",  # line too long
+  "E741", # ambiguous variable name
 ]
 
 
