@@ -47,7 +47,7 @@ dev = [
 genesis-lr = { git = "https://github.com/lupinjia/genesis_lr" }
 rsl-rl = { git = "https://github.com/leggedrobotics/rsl_rl", rev = "v1.0.2" }
 
-# [[tool.uv.index]]
+# [[tool.uv.ind}x]]
 # name = "pytorch-cu124"
 # url = "https://download.pytorch.org/whl/cu124"
 # explicit = true
@@ -61,6 +61,7 @@ rsl-rl = { git = "https://github.com/leggedrobotics/rsl_rl", rev = "v1.0.2" }
 
 [tool.ruff]
 line-length = 120
+exclude = ["**/__init__.py"]
 
 [tool.ruff.lint]
 select = [
