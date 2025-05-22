@@ -1,24 +1,11 @@
 repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
-    # uv version.
     rev: 0.5.14
     hooks:
       - id: uv-lock
-    # - repo: https://github.com/psf/black
-    # rev: 24.4.2
-    # hooks:
-    # - id: black
-    # args: ["--quiet"]
-    # - repo: https://github.com/pycqa/isort
-    # rev: 5.13.2
-    # hooks:
-    # - id: isort
-    # args: ["--profile", "black"]
-    # Ruff version.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.6
     hooks:
-      # Run the linter.
       - id: ruff
         args: [--fix]
       - id: ruff-format

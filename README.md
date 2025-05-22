@@ -84,10 +84,20 @@ uv sync --dev
 uvx pre-commit install
 ```
 
+Formatting and linting are handled by [Ruff](https://docs.astral.sh/ruff/), so
+the repository no longer includes Black or Isort hooks.
+
+Unit tests can be run with `pytest`:
+
+```bash
+pytest
+```
+
 ## Directory Structure
 
 - `main.py` – example entry point for running environments.
-- `tag/` – Python package with experimental code (e.g. `brax/barkour.py`).
+- `tag/` – Python package with experimental code (e.g. `brax/barkour.py`). The
+  directory now includes `__init__.py` files so modules can be imported.
 - `extras/` – additional resources used in notebooks or experiments.
 - `third-party/` – vendored dependencies or assets.
 - `pyproject.toml` – project configuration and dependency list.
