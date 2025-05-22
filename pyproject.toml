@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "genesis-world>=0.2.1",
     "gymnasium>=1.1.1",
+    "libigl[genesis]==2.5.1",
     "matplotlib>=3.10.1",
     "mediapy>=1.2.2",
     "pytest>=8.3.5",
@@ -42,6 +43,10 @@ debug = [
 dev = [
     "pre-commit>=4.2.0",
 ]
+
+[tool.setuptools]
+packages = ["tag"]
+
 
 [tool.uv.sources]
 genesis-lr = { git = "https://github.com/lupinjia/genesis_lr" }
