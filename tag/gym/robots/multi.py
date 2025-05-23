@@ -2,17 +2,16 @@ from typing import Dict
 
 import genesis as gs
 
-from tag.gym.go2Robot import Go2Robot
-from tag.gym.tagConfig import Go2Config
+from tag.gym.robots.go2 import Go2Config, Go2Robot
 
 
-class TagRobots:
+class MultiRobot:
     """Version 1"""
 
-    def __init__(
-        self, scene: gs.Scene, cfg: Go2Config, uiv: list[str]
-    ):  # Need settings for distance apart, where to spawn, etc.
+    def __init__(self, scene: gs.Scene, cfg: Go2Config, uiv: list[str]):
+        # Need settings for distance apart, where to spawn, etc.
         # We need to separate them via a config or a task input somewhere
+
         cfg.init_state.pos = [0.0, -0.5, 0.42]
         self.robot_1 = Go2Robot(scene, cfg, uiv)
         cfg.init_state.pos = [0.0, 0.5, 0.42]

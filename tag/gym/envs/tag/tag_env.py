@@ -5,8 +5,9 @@ from gym.spaces import Box, Dict
 import torch
 
 from tag.gym.base.env import BaseEnv
-from tag.gym.tagConfig import Go2EnvConfig
-from tag.gym.tagRobots import TagRobots
+from tag.gym.robots.multi import MultiRobot
+
+from .tag_config import Go2EnvConfig
 
 
 class TagEnv(BaseEnv):
@@ -45,7 +46,8 @@ class TagEnv(BaseEnv):
                 dt=cfg.solver.dt,
             ),
             vis_options=gs.options.VisOptions(
-                show_world_frame=cfg.vis.show_world_frame, n_rendered_envs=self.n_rendered
+                show_world_frame=cfg.vis.show_world_frame,
+                n_rendered_envs=self.n_rendered,
             ),
         )
 
@@ -62,7 +64,7 @@ class TagEnv(BaseEnv):
             )
 
         # Go2
-        self.robots = TagRobots(self.scene, self.cfg.robotCfg, ["r1", "r2"])
+        self.robots = MultiRobot(self.scene, self.cfg.robotCfg, ["r1", "r2"])
 
         # TODO: Implement Camera Class and Options
         if self.cfg.vis.visualized:
@@ -208,7 +210,10 @@ class TagEnv(BaseEnv):
         )
 
         self.action_space = Dict(
-            {"r1": Box(low=-2, high=2, shape=(self.n_envs, 12)), "r2": Box(low=-2, high=2, shape=(self.n_envs, 12))}
+            {
+                "r1": Box(low=-2, high=2, shape=(self.n_envs, 12)),
+                "r2": Box(low=-2, high=2, shape=(self.n_envs, 12)),
+            }
         )
 
     def _update_buffers(self):
