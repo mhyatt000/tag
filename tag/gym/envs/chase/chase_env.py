@@ -1,20 +1,25 @@
-from typing import Tuple
+"""Chase environment implementation."""
+
+from typing import Dict, Tuple
 
 import genesis as gs
 from gymnasium.spaces import Box, Dict
 import torch
 
 from tag.gym.base.env import BaseEnv
+from tag.gym.envs.terrain_mixin import TerrainEnvMixin
 from tag.gym.robots.multi import MultiRobot
 
-from chase_config import ChaseEnvConfig
+from .chase_config import ChaseEnvConfig
+from .utils import create_camera, create_robots, create_scene
 
 
-class Chase(BaseEnv):
-    """Version 1"""
+class Chase(TerrainEnvMixin, BaseEnv):
+    """Simple two-robot chase environment."""
 
-    def __init__(self, args=None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
-        self.cfg = cfg
+    def __init__(self, args: Dict | None = None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
+        """Create a new environment instance."""
+        self.cfg: ChaseEnvConfig = cfg
         # if args is not None:
         #     self.n_envs = args.n_envs
         #     self.n_rendered = args.n_rendered
@@ -39,42 +44,14 @@ class Chase(BaseEnv):
         )
 
         # Scene
-        self.scene = gs.Scene(
-            show_viewer=self.cfg.viewer.show_viewer,
-            rigid_options=gs.options.RigidOptions(
-                enable_joint_limit=cfg.solver.joint_limit,
-                dt=cfg.solver.dt,
-            ),
-            vis_options=gs.options.VisOptions(
-                show_world_frame=cfg.vis.show_world_frame,
-                n_rendered_envs=self.n_rendered,
-            ),
-        )
+        self.scene: gs.Scene = create_scene(cfg, self.n_rendered)
 
         # self._init_buffers()
         self._init_spaces()
 
-        # Entites
-
-        # Plane
-        # TODO: Implement Terrain Class and Options/Implementation
-        if cfg.terrain.mesh_type == "plane":
-            self.terrain = self.scene.add_entity(
-                gs.morphs.Plane(),
-            )
-
-        # Go2
-        self.robots = MultiRobot(self.scene, self.cfg.robotCfg, ["r1", "r2"])
-
-        # TODO: Implement Camera Class and Options
-        if self.cfg.vis.visualized:
-            self.cam = self.scene.add_camera(
-                res=(1280, 720),
-                pos=(7, 0.0, 2.5),
-                lookat=(0, 0, 0.5),
-                fov=60,
-                GUI=False,
-            )
+        # Entities
+        self.robots: MultiRobot = create_robots(self.scene, self.cfg.robotCfg)
+        self.cam = create_camera(self.scene, self.cfg.vis.visualized)
 
         self.build()
 
@@ -83,7 +60,8 @@ class Chase(BaseEnv):
             n_envs=self.n_envs,
             env_spacing=self.env_spacing if self.n_rendered > 1 else [0, 0],
         )
-        if self.cfg.vis.visualized:
+        self.build_terrain()
+        if self.cam is not None:
             self.cam.start_recording()
 
     # TODO: Implement Method - Input should be changed to Robot class when completed
@@ -91,7 +69,8 @@ class Chase(BaseEnv):
         pass
 
     # TODO: Properly Implement Step Method - Actions, Updates, etc.
-    def step(self, actions: Dict):
+    def step(self, actions: Dict) -> Tuple[Dict, None, None, None, None]:
+        """Advance the simulation by one step."""
         # Execute actions
 
         self.robots.act(actions)
@@ -115,7 +94,8 @@ class Chase(BaseEnv):
         return obs, None, None, None, None
 
     # TODO: Implement Reset Method
-    def reset(self):
+    def reset(self) -> Tuple[Dict, None]:
+        """Reset the environment state."""
         return self.action_space.sample(), None
 
     # TODO: Review
@@ -127,6 +107,7 @@ class Chase(BaseEnv):
         return self._obs
 
     def compute_observations(self) -> Dict:
+        """Collect observations from robots and environment."""
         robot_obs = {
             r: {
                 "base_pos": r.robot.get_pos(),
@@ -149,10 +130,12 @@ class Chase(BaseEnv):
         return self.get_observations()
 
     def record_data(self):
+        """Finalize and save any visual recordings."""
         if self.cfg.vis.visualized:
             self.cam.stop_recording(save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60)
 
     def _init_buffers(self):
+        """Allocate internal tensors used for stepping the environment."""
         self.obs_buf = torch.zeros((self.n_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
         self.privileged_obs_buf = (
             None
@@ -172,6 +155,7 @@ class Chase(BaseEnv):
         # self.base_ang_vel = torch.zeros((self.n_envs, 3), device=gs.device, dtype=gs.tc_float)
 
     def _init_spaces(self):
+        """Define observation and action spaces."""
         self.observation_space = Dict(
             {
                 "Robots": Dict(
@@ -217,6 +201,7 @@ class Chase(BaseEnv):
         )
 
     def _update_buffers(self):
+        """Example buffer update for testing."""
         self.episode_length_buf += 1
         self.obs_buf = torch.cat(  # Entire Observation
             [
