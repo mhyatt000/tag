@@ -5,6 +5,7 @@ import genesis as gs
 import numpy as np
 import torch
 
+from gymnasium import spaces
 from tag.gym.base.config import (
     Asset,
     Control,
@@ -50,8 +51,30 @@ class Go2Config(RobotConfig):
 
 class Go2Robot(Robot):
     def __init__(self, scene: gs.Scene, cfg: Go2Config, uid: str):
+        self.uid = uid
         self.cfg = cfg
         self.robot = scene.add_entity(gs.morphs.URDF(file=cfg.asset.file, pos=cfg.init_state.pos))
+
+        # Define observation and action spaces for this robot
+        self.observation_space = spaces.Dict(
+            {
+                "base_pos": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "base_quat": spaces.Box(-np.inf, np.inf, shape=(4,), dtype=np.float32),
+                "base_velo": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "base_ang": spaces.Box(-np.inf, np.inf, shape=(3,), dtype=np.float32),
+                "link_pos": spaces.Box(-np.inf, np.inf, shape=(12, 3), dtype=np.float32),
+                "link_quat": spaces.Box(-np.inf, np.inf, shape=(12, 4), dtype=np.float32),
+                "link_vel": spaces.Box(-np.inf, np.inf, shape=(12, 3), dtype=np.float32),
+                "link_links_ang": spaces.Box(-np.inf, np.inf, shape=(12, 3), dtype=np.float32),
+                "link_acc": spaces.Box(-np.inf, np.inf, shape=(12, 3), dtype=np.float32),
+            }
+        )
+        self.action_space = spaces.Box(
+            low=-1.0,
+            high=1.0,
+            shape=(len(cfg.asset.local_dofs),),
+            dtype=np.float32,
+        )
 
     def reset(self):
         """To Be implemented
