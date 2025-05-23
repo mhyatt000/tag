@@ -1,10 +1,14 @@
 import torch
 
+from gymnasium import spaces
 from tag.gym.base.config import RobotConfig
 
 
 class Robot:
     cfg: RobotConfig
+
+    observation_space: spaces.Space
+    action_space: spaces.Space
 
     def reset(self) -> None: ...
 
