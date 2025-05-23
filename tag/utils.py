@@ -1,8 +1,7 @@
 from gymnasium import spaces
 import jax
-import jax.numpy as jnp
-import torch
 import numpy as np
+import torch
 
 
 def space2spec(space: spaces.Space):

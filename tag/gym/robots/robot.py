@@ -1,6 +1,6 @@
+from gymnasium import spaces
 import torch
 
-from gymnasium import spaces
 from tag.gym.base.config import RobotConfig
 
 

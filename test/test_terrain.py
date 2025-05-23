@@ -1,8 +1,6 @@
-from types import SimpleNamespace
 import os
 import sys
-
-import pytest
+from types import SimpleNamespace
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -20,9 +18,9 @@ sys.modules.setdefault("torch", SimpleNamespace())
 sys.modules.setdefault("tag.gym.robots.go2", SimpleNamespace(Go2Config=object, Go2Robot=object))
 
 from tag.gym.envs import terrain_mixin
-from tag.gym.envs.terrain_mixin import TerrainEnvMixin
-from tag.gym.envs.chase.utils import create_scene
 from tag.gym.envs.chase.chase_config import ChaseEnvConfig
+from tag.gym.envs.chase.utils import create_scene
+from tag.gym.envs.terrain_mixin import TerrainEnvMixin
 
 
 class DummyScene:
@@ -74,6 +72,7 @@ def test_create_scene(monkeypatch):
         options=SimpleNamespace(RigidOptions=RigidOptions, VisOptions=VisOptions),
     )
     import tag.gym.envs.chase.utils as utils
+
     monkeypatch.setattr(utils, "gs", stub_gs)
 
     cfg = ChaseEnvConfig()

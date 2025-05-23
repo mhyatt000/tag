@@ -6,9 +6,10 @@ from typing import Optional
 
 import genesis as gs
 
-from .chase_config import ChaseEnvConfig
-from tag.gym.robots.multi import MultiRobot
 from tag.gym.robots.go2 import Go2Config
+from tag.gym.robots.multi import MultiRobot
+
+from .chase_config import ChaseEnvConfig
 
 
 def create_scene(cfg: ChaseEnvConfig, n_rendered: int) -> gs.Scene:

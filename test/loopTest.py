@@ -1,13 +1,14 @@
 import genesis as gs
+
 from tag.gym.envs.chase.chase_env import Chase
 from tag.policy.dummy import DummyPolicy
 
 # import os
 # os.environ["PYOPENGL_PLATFORM"] = "egl"
 
-def main():
 
-    gs.init( logging_level="info", backend=gs.gpu)
+def main():
+    gs.init(logging_level="info", backend=gs.gpu)
 
     env = Chase()
     policy = DummyPolicy(env.action_space)

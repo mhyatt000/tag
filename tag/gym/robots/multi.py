@@ -1,8 +1,8 @@
 from typing import Dict
 
 import genesis as gs
-
 from gymnasium import spaces
+
 from tag.gym.robots.go2 import Go2Config, Go2Robot
 from tag.gym.robots.robot import Robot
 
@@ -22,12 +22,8 @@ class MultiRobot(Robot):
         self.robot_1 = robot_1
         self.robot_2 = robot_2
 
-        self.observation_space = spaces.Dict(
-            {uid: r.observation_space for uid, r in self.robots.items()}
-        )
-        self.action_space = spaces.Dict(
-            {uid: r.action_space for uid, r in self.robots.items()}
-        )
+        self.observation_space = spaces.Dict({uid: r.observation_space for uid, r in self.robots.items()})
+        self.action_space = spaces.Dict({uid: r.action_space for uid, r in self.robots.items()})
 
     def act(self, actions: Dict, mode: str = "position"):
         for uid, robot in self.robots.items():

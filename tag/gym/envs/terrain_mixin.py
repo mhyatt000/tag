@@ -2,6 +2,7 @@
 
 import genesis as gs
 
+
 class TerrainEnvMixin:
     """Mixin to add terrain creation helpers for environments."""
 

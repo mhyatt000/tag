@@ -1,6 +1,5 @@
 """Chase environment implementation."""
 
-from tag.gym.robots.go2 import Go2Config, Go2Robot
 from typing import Dict as TDict
 from typing import Tuple
 
@@ -10,17 +9,17 @@ import torch
 
 from tag.gym.base.env import BaseEnv
 from tag.gym.envs.terrain_mixin import TerrainEnvMixin
-from tag.gym.robots.multi import MultiRobot
+from tag.gym.robots.go2 import Go2Robot
 
 from .chase_config import ChaseEnvConfig
-from .utils import create_camera, create_robots, create_scene
+from .utils import create_camera, create_scene
 
 
-class Chase(BaseEnv,TerrainEnvMixin):
+class Chase(BaseEnv, TerrainEnvMixin):
     """Simple two-robot chase environment."""
 
     def __init__(self, cfg: ChaseEnvConfig = ChaseEnvConfig()):
-                 # , args: TDict | None = None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
+        # , args: TDict | None = None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
         """Create a new environment instance."""
         super().__init__(cfg)
         self.cfg: ChaseEnvConfig = cfg
@@ -36,7 +35,7 @@ class Chase(BaseEnv,TerrainEnvMixin):
 
         # Entities
         # self.robots: MultiRobot = create_robots(self.scene, self.cfg.robotCfg)
-        self.robots = Go2Robot(self.scene, self.cfg.robot, 'r1')
+        self.robots = Go2Robot(self.scene, self.cfg.robot, "r1")
 
         self.cam = create_camera(self.scene, self.cfg.vis.visualized)
 
