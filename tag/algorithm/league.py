@@ -23,9 +23,7 @@ class League:
         if 0 <= index < len(self.policies):
             self.policies.pop(index)
             # Drop related history entries
-            self.match_history = {
-                k: v for k, v in self.match_history.items() if index not in k
-            }
+            self.match_history = {k: v for k, v in self.match_history.items() if index not in k}
 
     def select_opponents(self, index: int, k: int = 1) -> List[int]:
         """Return ``k`` opponent indices for the given policy index."""

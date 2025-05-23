@@ -7,7 +7,11 @@ requires-python = ">=3.11"
 dependencies = [
     "genesis-world>=0.2.1",
     "gymnasium>=1.1.1",
+<<<<<<< HEAD
     "libigl[genesis]==2.5.1",
+=======
+    "libigl==2.6.1",
+>>>>>>> ca19f0a388707c44609adee22c71f97a22465604
     "matplotlib>=3.10.1",
     "mediapy>=1.2.2",
     "open3d>=0.19.0",
@@ -18,12 +22,12 @@ dependencies = [
     "tqdm>=4.67.1",
     "tyro>=0.9.20",
     "wandb>=0.19.11",
+    "jax[cuda12]>=0.5.3",
 ]
 
 [project.optional-dependencies]
 brax = [
     "brax>=0.12.1",
-    "jax[cuda12]>=0.5.3",
     "mujoco>=3.2.5",
     "mujoco-mjx>=3.2.5",
 ]

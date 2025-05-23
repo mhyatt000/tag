@@ -27,7 +27,12 @@ class BaseEnv:
         self.num_privileged_obs = task_cfg.num_privileged_obs
         self.max_episode_length = task_cfg.max_episode_length
 
-        self._init_buffers()
+        self._max_steps = int(1e3)
+        # self._init_buffers()
+
+    def __len__(self) -> int:
+        """Return the number of environments."""
+        return self._max_steps
 
     def build(self) -> None:
         ...
@@ -40,15 +45,11 @@ class BaseEnv:
     def record_data(self) -> None:
         """Finalize and save camera recordings, if any."""
         if getattr(self.cfg.vis, "visualized", False) and hasattr(self, "cam"):
-            self.cam.stop_recording(
-                save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60
-            )
+            self.cam.stop_recording(save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60)
 
     def _init_buffers(self) -> None:
         """Allocate common buffers used for stepping the environment."""
-        self.obs_buf = torch.zeros(
-            (self.n_envs, self.num_obs), device=self.device, dtype=gs.tc_float
-        )
+        self.obs_buf = torch.zeros((self.n_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
         self.privileged_obs_buf = (
             None
             if self.num_privileged_obs is None
@@ -58,15 +59,9 @@ class BaseEnv:
                 dtype=gs.tc_float,
             )
         )
-        self.reset_buf = torch.ones(
-            (self.n_envs,), device=self.device, dtype=gs.tc_int
-        )
-        self.rew_buf = torch.zeros(
-            (self.n_envs,), device=self.device, dtype=gs.tc_float
-        )
-        self.episode_length_buf = torch.zeros(
-            (self.n_envs,), device=self.device, dtype=gs.tc_int
-        )
+        self.reset_buf = torch.ones((self.n_envs,), device=self.device, dtype=gs.tc_int)
+        self.rew_buf = torch.zeros((self.n_envs,), device=self.device, dtype=gs.tc_float)
+        self.episode_length_buf = torch.zeros((self.n_envs,), device=self.device, dtype=gs.tc_int)
 
     def _update_buffers(self) -> None:
         """Placeholder buffer update used for testing."""

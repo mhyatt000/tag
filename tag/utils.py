@@ -1,7 +1,7 @@
 from gymnasium import spaces
 import jax
-import jax.numpy as jnp
 import numpy as np
+import torch
 
 
 def space2spec(space: spaces.Space):
@@ -36,6 +36,6 @@ def spec2batchspec(spec, n_envs: int):
     """
 
     def _stack(x):
-        return jnp.stack([x] * n_envs)
+        return torch.stack([x] * n_envs)
 
-    return jax.tree_util.tree_map(_stack, spec)
+    return jax.tree.map(_stack, spec)

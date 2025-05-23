@@ -20,7 +20,7 @@ class Go2EnvConfig(EnvConfig):
     vis: Vis = default(Vis(env_spacing=default([2.5, 2.5])))
     solver: Solver = default(Solver())
     sim: Sim = default(Sim())
-    robotCfg: Go2Config = default(Go2Config())
+    robot: Go2Config = default(Go2Config())
 
 
 # --- Task Environments ---

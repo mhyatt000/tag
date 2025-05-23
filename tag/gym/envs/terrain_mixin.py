@@ -2,10 +2,11 @@
 
 import genesis as gs
 
+
 class TerrainEnvMixin:
     """Mixin to add terrain creation helpers for environments."""
 
-    def build_terrain(self) -> None:
+    def _init_terrain(self) -> None:
         """Create terrain entity based on ``self.cfg.terrain``.
 
         Subclasses are expected to define ``self.scene`` and ``self.cfg`` with a
