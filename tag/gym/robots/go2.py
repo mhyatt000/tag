@@ -22,15 +22,14 @@ class Go2Config(RobotConfig):
     asset: Asset = default(
         Asset(
             file="urdf/go2/urdf/go2.urdf",
-            local_dofs=default([6, 8, 7, 9, 10, 12, 11, 13, 14, 16, 15, 17]),
+            local_dofs=[6, 8, 7, 9, 10, 12, 11, 13, 14, 16, 15, 17],
         )
     )
 
     init_state: InitState = default(
         InitState(
-            pos=default([0.0, 0.0, 0.42]),
-            default_joint_angles=default(
-                {
+            pos=[0.0, 0.0, 0.42],
+            default_joint_angles= {
                     "FL_hip_joint": 0.1,
                     "RL_hip_joint": 0.1,
                     "FR_hip_joint": -0.1,
@@ -44,7 +43,6 @@ class Go2Config(RobotConfig):
                     "FR_calf_joint": -1.5,
                     "RR_calf_joint": -1.5,
                 }
-            ),
         )
     )
 
@@ -87,11 +85,12 @@ class Go2Robot(Robot):
 
     def act(self, action: torch.Tensor, mode: str = "position"):
         # Velocity/Force if needed
+        # NOTE(dle) Couldn't get config to work for some reason
         if mode == "position":
             self.robot.control_dofs_position(
                 position=action,
                 dofs_idx_local=np.array(
-                    [6, 8, 7, 9, 10, 12, 11, 13, 14, 16, 15, 17]  # Couldn't get config to work for some reason
+                    [6, 8, 7, 9, 10, 12, 11, 13, 14, 16, 15, 17]  
                 ),
             )
 

@@ -4,9 +4,10 @@ import genesis as gs
 
 from gymnasium import spaces
 from tag.gym.robots.go2 import Go2Config, Go2Robot
+from tag.gym.robots.robot import Robot
 
 
-class MultiRobot:
+class MultiRobot(Robot):
     """Version 1"""
 
     def __init__(self, scene: gs.Scene, cfg: Go2Config, uiv: list[str]):
@@ -40,3 +41,5 @@ class MultiRobot:
 
     def __iter__(self):
         return iter(self.robots.values())
+
+    # TODO(codex) this needs observation and action space implemented

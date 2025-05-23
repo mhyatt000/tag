@@ -63,7 +63,7 @@ class Task:
 class InitState:
     default_joint_angles: dict[str, float] = default({"joint", 1.0})  # default pose
 
-    pos: list[float] = default([0.0, 0.0, 1.0])  # spawn position
+    pos: list[float] = default((0.0, 0.0, 1.0))  # spawn position
     quat: list[float] = default([1.0, 0.0, 0.0, 0.0])  # spawn orientation
 
     randomize_angle: bool = False  # DR - Initial Angle Spawn

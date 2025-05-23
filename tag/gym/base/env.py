@@ -27,7 +27,13 @@ class BaseEnv:
         self.num_privileged_obs = task_cfg.num_privileged_obs
         self.max_episode_length = task_cfg.max_episode_length
 
-        self._init_buffers()
+        self._max_steps = int(1e3)
+        # self._init_buffers()
+
+
+    def __len__(self) -> int:
+        """Return the number of environments."""
+        return self._max_steps
 
     def build(self) -> None:
         ...
