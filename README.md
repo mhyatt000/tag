@@ -74,6 +74,62 @@ classDiagram
     XArm7 ..|> Robot
 ```
 
+## Policy and Environment Wrappers
+
+```mermaid
+classDiagram
+    class Policy {
+        +observe(env: EnvWrapper1)
+        +act(): Action
+        +train(data): void
+    }
+
+    class EnvWrapper1 {
+        -env: EnvWrapper2
+        -buffer: Buffer
+        +step(action): Observation
+        +reset(): Observation
+    }
+
+    class EnvWrapper2 {
+        -env: Env
+        +step(action): Observation
+        +reset(): Observation
+    }
+
+    class Env {
+        +Robot[] robots
+        +Terrain terrain
+        +ObstacleTree obstacle_tree
+    }
+
+    class Buffer {
+        +store(obs, action, reward)
+        +sample(): Batch
+    }
+
+    class Robot
+
+    class Terrain
+
+    class ObstacleTree {
+        +Obstacle[] obstacles
+    }
+
+    class Obstacle
+
+    Policy --> EnvWrapper1 : interacts with
+    EnvWrapper1 --> Policy : receives actions from
+    EnvWrapper1 --> EnvWrapper2 : wraps
+    EnvWrapper1 --> Buffer : logs to
+    EnvWrapper2 --> Env : wraps
+    Env --> Robot
+    Env --> Terrain
+    Env --> ObstacleTree
+    ObstacleTree --> Obstacle
+    Policy --> Buffer : stores to
+    Buffer --> Policy : trains
+```
 
 ## Development
 
