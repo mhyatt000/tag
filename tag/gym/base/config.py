@@ -61,7 +61,7 @@ class Task:
 
 @dataclass
 class InitState:
-    default_joint_angles: dict[str, float]  # default pose
+    default_joint_angles: dict[str, float] = default({"joint", 1.0})  # default pose
 
     pos: list[float] = default([0.0, 0.0, 1.0])  # spawn position
     quat: list[float] = default([1.0, 0.0, 0.0, 0.0])  # spawn orientation
@@ -86,8 +86,8 @@ class State:
 
 @dataclass
 class Control:
-    kp: float
-    kd: float
+    kp: float = 1.0
+    kd: float = 1.0
     control_type: str = "P"
     action_scale: float = 0.5  # TODO(dle) add example in docstring
     decimation: float = 4
@@ -96,8 +96,8 @@ class Control:
 
 @dataclass
 class Asset:
-    file: str
-    local_dofs: list[int]
+    file: str = default("DO NOT REMOVE PLEASE")
+    local_dofs: list[int] = default([1, 2, 3])
 
 
 @dataclass
