@@ -35,17 +35,26 @@ class BaseEnv:
         return self._max_steps
 
     def build(self) -> None:
-        ...
-        # TODO(dle) add build here
+        self.scene = gs.Scene(
+            show_viewer=self.cfg.viewer.show_viewer,
+            rigid_options=gs.options.RigidOptions(),
+            vis_options=gs.options.VisOptions(
+                n_rendered_envs=self.n_rendered,
+            ),
+        )
 
     def step(self, actions: torch.Tensor) -> None: ...
 
     def reset(self) -> None: ...
 
-    def record_data(self) -> None:
+    def record_visualization(self, fileName: str = None) -> None:
         """Finalize and save camera recordings, if any."""
         if getattr(self.cfg.vis, "visualized", False) and hasattr(self, "cam"):
-            self.cam.stop_recording(save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60)
+            if fileName is None:
+                self.cam.stop_recording(save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60)
+            else:
+                path = "./tag/gym/mp4/" + fileName + ".mp4"
+                self.cam.stop_recording(save_to_filename=path)
 
     def _init_buffers(self) -> None:
         """Allocate common buffers used for stepping the environment."""
