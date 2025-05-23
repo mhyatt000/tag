@@ -7,9 +7,10 @@ requires-python = ">=3.11"
 dependencies = [
     "genesis-world>=0.2.1",
     "gymnasium>=1.1.1",
-    "libigl[genesis]==2.6.1",
+    "libigl[genesis]==2.5.1",
     "matplotlib>=3.10.1",
     "mediapy>=1.2.2",
+    "open3d>=0.19.0",
     "pytest>=8.3.5",
     "rich>=14.0.0",
     "scipy==1.13.1",
