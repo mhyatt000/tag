@@ -1249,24 +1249,22 @@ wheels = [
 
 [[package]]
 name = "libigl"
-version = "2.6.1"
+version = "2.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/26/27a679e6ed3926333a8128b7535da189567885a2852ab1a28e794d3305a0/libigl-2.6.1.tar.gz", hash = "sha256:2d2694ac28b4b6f0f9d00ee6135d3db914bd1233f393c316293289da462eb996", size = 41212074, upload-time = "2025-05-15T20:10:33.854Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/ee/fc4ab0b718b05d32d5f7b961c4273ea505683e7d1ff0edb399cbcbeef04f/libigl-2.5.1.zip", hash = "sha256:b85db781427ba5c9d1586b3c4bfd33b8f0fa225f3a5003dd3cb7c3f998b0be41", size = 45000, upload-time = "2024-03-27T16:52:19.39Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a0/bc/70a1e2d51af72feae4f0933fe90dafbbd9ed9d99cec599de63201d329f03/libigl-2.6.1-cp311-cp311-macosx_10_15_x86_64.whl", hash = "sha256:fec058d19838e8d2824f5aabe649c05cc123a8480f3ca4643d991632ee1295f7", size = 12300039, upload-time = "2025-05-15T19:53:26.414Z" },
-    { url = "https://files.pythonhosted.org/packages/cc/f1/37b1a945013741b8cafe1b5ece19dd81b1fb910fb9b3d02d69b5b3b367da/libigl-2.6.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:65bbb69b333491a4200789f4a04e4b562a8455bc5ed96b759de154cf7b226633", size = 11302991, upload-time = "2025-05-15T19:53:52.539Z" },
-    { url = "https://files.pythonhosted.org/packages/61/cf/9d4ab83b1ce21388e562fa40e7a983e0c08d9951536f57c6a9458e94a22a/libigl-2.6.1-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b3020b6bba54d75d5dae7fd4429223fe1969097a5ac5d05440c6130fdadebbc3", size = 12963022, upload-time = "2025-05-15T19:54:20.518Z" },
-    { url = "https://files.pythonhosted.org/packages/d8/41/4efcb97254fd57e572ba7f419108968663a872ca6f1c584b7f012da0d3bd/libigl-2.6.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:25697bfbea20957d9b7ae9abff95a560297b33bf92ba255b8a8f1b8990c0fcbb", size = 13387414, upload-time = "2025-05-15T19:55:04.551Z" },
-    { url = "https://files.pythonhosted.org/packages/b2/99/47a3b80f0d56ffe7436fd13c2aec5f34d9d320756049c9f57e053f8268f0/libigl-2.6.1-cp311-cp311-win_amd64.whl", hash = "sha256:1e3dc3cdbbce5c700a7f804173af42a62ca55e3690d5054edb7b4102a6e22ceb", size = 13519086, upload-time = "2025-05-15T19:56:17.125Z" },
-    { url = "https://files.pythonhosted.org/packages/fb/bb/bc16b51a17ee4ff9e3112a7235b16ed29205fb0b7c08574d68360b64e17a/libigl-2.6.1-cp312-abi3-macosx_10_15_x86_64.whl", hash = "sha256:d6f6df46a8534996cc4b641047e94a5c4107b957612e2b29f0fceb43e3a69c7a", size = 12286509, upload-time = "2025-05-15T19:53:32.714Z" },
-    { url = "https://files.pythonhosted.org/packages/29/6f/dd012c6a8bbe81db49c356f09b221aa684b32c4bb17257a99a43391c58d4/libigl-2.6.1-cp312-abi3-macosx_11_0_arm64.whl", hash = "sha256:90e60d769d885d0e64c66ff9cd293c112a0de8ede28840ed1c5bc522680f51ef", size = 11294536, upload-time = "2025-05-15T19:53:58.842Z" },
-    { url = "https://files.pythonhosted.org/packages/89/48/592e3e62590a852e9819f3bba86ed7f353495cc4440233dd1ddfad2dd66f/libigl-2.6.1-cp312-abi3-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:279db1c84cd957ff29ab1defd794383f68bdb5f49f893a06bf90c68f30a271a7", size = 12943370, upload-time = "2025-05-15T19:54:33.136Z" },
-    { url = "https://files.pythonhosted.org/packages/9c/5c/bc7aec8d3a93ce700dd6644c771a22fe6aff00379f7c97073f65a29270e8/libigl-2.6.1-cp312-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8fd48f867663df7fd052444c10eb1fa1c303acc86e4016067972b4aab0ae4588", size = 13369663, upload-time = "2025-05-15T19:55:11.72Z" },
-    { url = "https://files.pythonhosted.org/packages/97/8b/77405e7076e218351a14c1561f2a324b499df8dd3711a517e5d082ed1c77/libigl-2.6.1-cp312-abi3-win_amd64.whl", hash = "sha256:9d0516ab8d90b2889e7274b91eb518ec66ec5d7c0bbbbd0be7da0345b682214e", size = 13512802, upload-time = "2025-05-15T19:56:25.704Z" },
+    { url = "https://files.pythonhosted.org/packages/05/c1/c91a7139c49d40fba0947c697b888dcded9cc3baf2d0599661a7108cd14c/libigl-2.5.1-cp311-cp311-macosx_10_13_x86_64.whl", hash = "sha256:a97d75ae97115555c3b346b45edcd0049fb09f60487c29036d35bc8a17a8414c", size = 14394596, upload-time = "2024-03-27T16:52:01.077Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/b6/c10f0a03ded4a1b6a95a05679c44d8ef6ba5f6feb192756368b804b5a38b/libigl-2.5.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:8ce6058b3b12031e402b60bf375f6725bf639210f6efe06caeec0dacc65bd6ca", size = 11223728, upload-time = "2024-03-27T16:52:03.521Z" },
+    { url = "https://files.pythonhosted.org/packages/f3/e5/4256e661a6b487fed7ccd2e92bba0a0e901c4c1aa6b08b899e728119817b/libigl-2.5.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e949a145fa1d1913ed3d325032c9e7d6a20486be393a2dfbfe68f97015f5762b", size = 16188466, upload-time = "2024-03-27T16:52:05.889Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/07/23be39b9b38ae70e94dd91a5162de0e60c78b13604ea040c7cd961cc3659/libigl-2.5.1-cp311-cp311-win_amd64.whl", hash = "sha256:d681810b272b603b1581104385d810926623474e755381fda6b2f79c495067d4", size = 7514352, upload-time = "2024-03-27T16:52:07.834Z" },
+    { url = "https://files.pythonhosted.org/packages/f8/99/dcf1cf40c87fba2afcc9f624b0a46605784d2ec6526775b9703821a55d57/libigl-2.5.1-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:39497f3c464e7739b20f5f9693226db467a5b41371a7fb6523abc78157edca5a", size = 14421230, upload-time = "2024-03-27T16:52:09.807Z" },
+    { url = "https://files.pythonhosted.org/packages/16/e3/fcd90ee2e798760feb28501d400bad8d0e1add3b7a0695931d70140d8c4f/libigl-2.5.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:173fc975fa74896e8275605a2e3c0e8f98c01670ae01774b81276d6933654d61", size = 11227055, upload-time = "2024-03-27T16:52:12.423Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/5a/de034dd2ee178394b7de59d94a32c74a9c475f98f9c56211362a2497513d/libigl-2.5.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8b4122669cf5d80a304d089cf094ce1c78cfd09cc5426347fad9961d80310045", size = 16210236, upload-time = "2024-03-27T16:52:14.591Z" },
+    { url = "https://files.pythonhosted.org/packages/63/80/675786479f98278522b55247bcbaf627b2b5ee0d424374df1377c4eec86f/libigl-2.5.1-cp312-cp312-win_amd64.whl", hash = "sha256:dfff324ca17d8785b97ec5539eb4de41afba6b49e2db859b309d47c894991124", size = 7512095, upload-time = "2024-03-27T16:52:17.835Z" },
 ]
 
 [[package]]
@@ -3340,9 +3338,11 @@ source = { virtual = "." }
 dependencies = [
     { name = "genesis-world" },
     { name = "gymnasium" },
+    { name = "jax", extra = ["cuda12"] },
     { name = "libigl" },
     { name = "matplotlib" },
     { name = "mediapy" },
+    { name = "open3d" },
     { name = "pytest" },
     { name = "rich" },
     { name = "scipy" },
@@ -3355,7 +3355,6 @@ dependencies = [
 [package.optional-dependencies]
 brax = [
     { name = "brax" },
-    { name = "jax", extra = ["cuda12"] },
     { name = "mujoco" },
     { name = "mujoco-mjx" },
 ]
@@ -3389,12 +3388,13 @@ requires-dist = [
     { name = "gymnasium", specifier = ">=1.1.1" },
     { name = "ipdb", marker = "extra == 'debug'", specifier = ">=0.13.13" },
     { name = "ipython", marker = "extra == 'debug'", specifier = ">=9.0.2" },
-    { name = "jax", extras = ["cuda12"], marker = "extra == 'brax'", specifier = ">=0.5.3" },
-    { name = "libigl", extras = ["genesis"], specifier = "==2.6.1" },
+    { name = "jax", extras = ["cuda12"], specifier = ">=0.5.3" },
+    { name = "libigl", extras = ["genesis"], specifier = "==2.5.1" },
     { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "mediapy", specifier = ">=1.2.2" },
     { name = "mujoco", marker = "extra == 'brax'", specifier = ">=3.2.5" },
     { name = "mujoco-mjx", marker = "extra == 'brax'", specifier = ">=3.2.5" },
+    { name = "open3d", specifier = ">=0.19.0" },
     { name = "open3d", marker = "extra == 'genesis'", specifier = ">=0.19.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0" },
     { name = "pyopengl", marker = "extra == 'gl'", specifier = ">=3.1.0" },
