@@ -34,15 +34,29 @@ plane = scene.add_entity(
 
 z_off = 0
 
-txtur = gs.options.textures.ColorTexture(color=(0.5, 1.0, 0.0))
-srfac = gs.options.surfaces.Plastic(diffuse_texture=txtur)
+# txtur = gs.options.textures.ColorTexture(color=(0.5, 1.0, 0.0))
+# srfac = gs.options.surfaces.Plastic(diffuse_texture=txtur)
+
+colors = {
+    'blue':(0,0,1),
+    'red':(1,0,0),
+    'green':(0,1,0),
+    'yellow':(1,1,0),
+    'orange':(1,0.64,0),
+    'purple':(1,0,1)
+}
+
+class ColoredSurface(gs.options.surfaces.Plastic):
+    def __init__(self, color:str):
+        super().__init__(diffuse_texture=gs.options.textures.ColorTexture(color=colors[color]))
+
 
 bot = scene.add_entity(
     gs.morphs.URDF(
         file="urdf/go2/urdf/go2.urdf",
         pos=(0.0, 0.0, z_off+0.5)
     ),
-    surface=srfac
+    surface=ColoredSurface('purple')
 )
 
 cam = scene.add_camera(

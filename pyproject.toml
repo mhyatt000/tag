@@ -7,11 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "genesis-world>=0.2.1",
     "gymnasium>=1.1.1",
-<<<<<<< HEAD
     "libigl[genesis]==2.5.1",
-=======
-    "libigl==2.6.1",
->>>>>>> ca19f0a388707c44609adee22c71f97a22465604
     "matplotlib>=3.10.1",
     "mediapy>=1.2.2",
     "open3d>=0.19.0",

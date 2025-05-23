@@ -3338,6 +3338,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "genesis-world" },
     { name = "gymnasium" },
+    { name = "jax", extra = ["cuda12"] },
     { name = "libigl" },
     { name = "matplotlib" },
     { name = "mediapy" },
@@ -3354,7 +3355,6 @@ dependencies = [
 [package.optional-dependencies]
 brax = [
     { name = "brax" },
-    { name = "jax", extra = ["cuda12"] },
     { name = "mujoco" },
     { name = "mujoco-mjx" },
 ]
@@ -3388,7 +3388,7 @@ requires-dist = [
     { name = "gymnasium", specifier = ">=1.1.1" },
     { name = "ipdb", marker = "extra == 'debug'", specifier = ">=0.13.13" },
     { name = "ipython", marker = "extra == 'debug'", specifier = ">=9.0.2" },
-    { name = "jax", extras = ["cuda12"], marker = "extra == 'brax'", specifier = ">=0.5.3" },
+    { name = "jax", extras = ["cuda12"], specifier = ">=0.5.3" },
     { name = "libigl", extras = ["genesis"], specifier = "==2.5.1" },
     { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "mediapy", specifier = ">=1.2.2" },
