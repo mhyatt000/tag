@@ -2,19 +2,19 @@ import glob
 import logging
 import math
 import os
-from pathlib import Path
 import pickle
 import sys
 import time
+from pathlib import Path
 
 import genesis as gs
-from genesis.options.morphs import Terrain
-from genesis.utils.geom import inv_quat, quat_to_xyz, transform_by_quat, transform_quat_by_quat
 import numpy as np
 import pygame
 import torch
+from genesis.options.morphs import Terrain
+from genesis.utils.geom import (inv_quat, quat_to_xyz, transform_by_quat,
+                                transform_quat_by_quat)
 
-# from rsl_rl.runners import OnPolicyRunner
 
 script_dir = Path(__file__).resolve().parent
 utils_path = (script_dir / ".." / ".." / "genesis" / "utils").resolve()
@@ -171,23 +171,6 @@ def get_cfgs(selected_directions):
     return env_cfg, obs_cfg, reward_cfg, command_cfg
 
 
-def simulate_joystick():
-    """Simulate a random joystick input."""
-    movements = [
-        [0.5, 0, 0],  # Forward
-        [-0.5, 0, 0],  # Reverse
-        [0, 0.5, 0],  # Right
-        [0, -0.5, 0],  # Left
-        [0.5, 0.5, 0],  # Diagonal Forward-Right
-        [0.5, -0.5, 0],  # Diagonal Forward-Left
-        [-0.5, 0.5, 0],  # Diagonal Reverse-Right
-        [-0.5, -0.5, 0],  # Diagonal Reverse-Left
-        [0, 0, 0.5],  # Rotate Right
-        [0, 0, -0.5],  # Rotate Left
-    ]
-    return movements[np.random.randint(len(movements))]
-
-
 # -----------------------------------------------------------------------------
 # Environment Class (Go2Env)
 # -----------------------------------------------------------------------------
@@ -244,8 +227,12 @@ class Go2Env:
 
         # Add ground plane and robot from URDF
         # self.scene.add_entity(gs.morphs.URDF(file="urdf/plane/plane.urdf", fixed=True))
-        self.base_init_pos = torch.tensor(self.env_cfg["base_init_pos"], device=self.device)
-        self.base_init_quat = torch.tensor(self.env_cfg["base_init_quat"], device=self.device)
+        self.base_init_pos = torch.tensor(
+            self.env_cfg["base_init_pos"], device=self.device
+        )
+        self.base_init_quat = torch.tensor(
+            self.env_cfg["base_init_quat"], device=self.device
+        )
         self.inv_base_init_quat = inv_quat(self.base_init_quat)
 
         terrain_type = terrain_types[1]
@@ -279,7 +266,10 @@ class Go2Env:
 
         self.scene.build(n_envs=num_envs)
 
-        self.motor_dofs = [self.robot.get_joint(name).dof_idx_local for name in self.env_cfg["dof_names"]]
+        self.motor_dofs = [
+            self.robot.get_joint(name).dof_idx_local
+            for name in self.env_cfg["dof_names"]
+        ]
 
         self.robot.set_dofs_kp([self.env_cfg["kp"]] * self.num_actions, self.motor_dofs)
         self.robot.set_dofs_kv([self.env_cfg["kd"]] * self.num_actions, self.motor_dofs)
@@ -288,20 +278,38 @@ class Go2Env:
         for name in self.reward_scales.keys():
             self.reward_scales[name] *= self.dt
             self.reward_functions[name] = getattr(self, "_reward_" + name)
-            self.episode_sums[name] = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
+            self.episode_sums[name] = torch.zeros(
+                (self.num_envs,), device=self.device, dtype=gs.tc_float
+            )
 
         # Initialize state buffers
-        self.base_lin_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
-        self.base_ang_vel = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
-        self.projected_gravity = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
-        self.global_gravity = torch.tensor([0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float).repeat(
-            self.num_envs, 1
+        self.base_lin_vel = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
         )
-        self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float)
-        self.rew_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
-        self.reset_buf = torch.ones((self.num_envs,), device=self.device, dtype=gs.tc_int)
-        self.episode_length_buf = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_int)
-        self.commands = torch.zeros((self.num_envs, self.num_commands), device=self.device, dtype=gs.tc_float)
+        self.base_ang_vel = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        )
+        self.projected_gravity = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        )
+        self.global_gravity = torch.tensor(
+            [0.0, 0.0, -1.0], device=self.device, dtype=gs.tc_float
+        ).repeat(self.num_envs, 1)
+        self.obs_buf = torch.zeros(
+            (self.num_envs, self.num_obs), device=self.device, dtype=gs.tc_float
+        )
+        self.rew_buf = torch.zeros(
+            (self.num_envs,), device=self.device, dtype=gs.tc_float
+        )
+        self.reset_buf = torch.ones(
+            (self.num_envs,), device=self.device, dtype=gs.tc_int
+        )
+        self.episode_length_buf = torch.zeros(
+            (self.num_envs,), device=self.device, dtype=gs.tc_int
+        )
+        self.commands = torch.zeros(
+            (self.num_envs, self.num_commands), device=self.device, dtype=gs.tc_float
+        )
         self.commands_scale = torch.tensor(
             [
                 self.obs_scales["lin_vel"],
@@ -311,15 +319,24 @@ class Go2Env:
             device=self.device,
             dtype=gs.tc_float,
         )
-        self.actions = torch.zeros((self.num_envs, self.num_actions), device=self.device, dtype=gs.tc_float)
+        self.actions = torch.zeros(
+            (self.num_envs, self.num_actions), device=self.device, dtype=gs.tc_float
+        )
         self.last_actions = torch.zeros_like(self.actions)
         self.dof_pos = torch.zeros_like(self.actions)
         self.dof_vel = torch.zeros_like(self.actions)
         self.last_dof_vel = torch.zeros_like(self.actions)
-        self.base_pos = torch.zeros((self.num_envs, 3), device=self.device, dtype=gs.tc_float)
-        self.base_quat = torch.zeros((self.num_envs, 4), device=self.device, dtype=gs.tc_float)
+        self.base_pos = torch.zeros(
+            (self.num_envs, 3), device=self.device, dtype=gs.tc_float
+        )
+        self.base_quat = torch.zeros(
+            (self.num_envs, 4), device=self.device, dtype=gs.tc_float
+        )
         self.default_dof_pos = torch.tensor(
-            [self.env_cfg["default_joint_angles"][name] for name in self.env_cfg["dof_names"]],
+            [
+                self.env_cfg["default_joint_angles"][name]
+                for name in self.env_cfg["dof_names"]
+            ],
             device=self.device,
             dtype=gs.tc_float,
         )
@@ -327,19 +344,39 @@ class Go2Env:
 
     def _resample_commands(self, envs_idx):
         self.commands[envs_idx, 0] = (
-            self.command_cfg["lin_vel_x_range"][1] - self.command_cfg["lin_vel_x_range"][0]
-        ) * torch.rand(len(envs_idx), device=self.device) + self.command_cfg["lin_vel_x_range"][0]
+            self.command_cfg["lin_vel_x_range"][1]
+            - self.command_cfg["lin_vel_x_range"][0]
+        ) * torch.rand(len(envs_idx), device=self.device) + self.command_cfg[
+            "lin_vel_x_range"
+        ][
+            0
+        ]
         self.commands[envs_idx, 1] = (
-            self.command_cfg["lin_vel_y_range"][1] - self.command_cfg["lin_vel_y_range"][0]
-        ) * torch.rand(len(envs_idx), device=self.device) + self.command_cfg["lin_vel_y_range"][0]
+            self.command_cfg["lin_vel_y_range"][1]
+            - self.command_cfg["lin_vel_y_range"][0]
+        ) * torch.rand(len(envs_idx), device=self.device) + self.command_cfg[
+            "lin_vel_y_range"
+        ][
+            0
+        ]
         self.commands[envs_idx, 2] = (
             self.command_cfg["ang_vel_range"][1] - self.command_cfg["ang_vel_range"][0]
-        ) * torch.rand(len(envs_idx), device=self.device) + self.command_cfg["ang_vel_range"][0]
+        ) * torch.rand(len(envs_idx), device=self.device) + self.command_cfg[
+            "ang_vel_range"
+        ][
+            0
+        ]
 
     def step(self, actions):
-        self.actions = torch.clip(actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"])
-        exec_actions = self.last_actions if self.simulate_action_latency else self.actions
-        target_dof_pos = exec_actions * self.env_cfg["action_scale"] + self.default_dof_pos
+        self.actions = torch.clip(
+            actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"]
+        )
+        exec_actions = (
+            self.last_actions if self.simulate_action_latency else self.actions
+        )
+        target_dof_pos = (
+            exec_actions * self.env_cfg["action_scale"] + self.default_dof_pos
+        )
         self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
         self.scene.step()
 
@@ -360,18 +397,34 @@ class Go2Env:
         self.dof_vel[:] = self.robot.get_dofs_velocity(self.motor_dofs)
 
         envs_idx = (
-            (self.episode_length_buf % int(self.env_cfg["resampling_time_s"] / self.dt) == 0)
+            (
+                self.episode_length_buf
+                % int(self.env_cfg["resampling_time_s"] / self.dt)
+                == 0
+            )
             .nonzero(as_tuple=False)
             .flatten()
         )
         self._resample_commands(envs_idx)
 
         self.reset_buf = self.episode_length_buf > self.max_episode_length
-        self.reset_buf |= torch.abs(self.base_euler[:, 1]) > self.env_cfg["termination_if_pitch_greater_than"]
-        self.reset_buf |= torch.abs(self.base_euler[:, 0]) > self.env_cfg["termination_if_roll_greater_than"]
+        self.reset_buf |= (
+            torch.abs(self.base_euler[:, 1])
+            > self.env_cfg["termination_if_pitch_greater_than"]
+        )
+        self.reset_buf |= (
+            torch.abs(self.base_euler[:, 0])
+            > self.env_cfg["termination_if_roll_greater_than"]
+        )
 
-        time_out_idx = (self.episode_length_buf > self.max_episode_length).nonzero(as_tuple=False).flatten()
-        self.extras["time_outs"] = torch.zeros_like(self.reset_buf, device=self.device, dtype=gs.tc_float)
+        time_out_idx = (
+            (self.episode_length_buf > self.max_episode_length)
+            .nonzero(as_tuple=False)
+            .flatten()
+        )
+        self.extras["time_outs"] = torch.zeros_like(
+            self.reset_buf, device=self.device, dtype=gs.tc_float
+        )
         self.extras["time_outs"][time_out_idx] = 1.0
 
         self.reset_idx(self.reset_buf.nonzero(as_tuple=False).flatten())
@@ -420,8 +473,12 @@ class Go2Env:
 
         self.base_pos[envs_idx] = self.base_init_pos
         self.base_quat[envs_idx] = self.base_init_quat.reshape(1, -1)
-        self.robot.set_pos(self.base_pos[envs_idx], zero_velocity=False, envs_idx=envs_idx)
-        self.robot.set_quat(self.base_quat[envs_idx], zero_velocity=False, envs_idx=envs_idx)
+        self.robot.set_pos(
+            self.base_pos[envs_idx], zero_velocity=False, envs_idx=envs_idx
+        )
+        self.robot.set_quat(
+            self.base_quat[envs_idx], zero_velocity=False, envs_idx=envs_idx
+        )
         self.base_lin_vel[envs_idx] = 0
         self.base_ang_vel[envs_idx] = 0
         self.robot.zero_all_dofs_velocity(envs_idx)
@@ -434,7 +491,8 @@ class Go2Env:
         self.extras["episode"] = {}
         for key in self.episode_sums.keys():
             self.extras["episode"]["rew_" + key] = (
-                torch.mean(self.episode_sums[key][envs_idx]).item() / self.env_cfg["episode_length_s"]
+                torch.mean(self.episode_sums[key][envs_idx]).item()
+                / self.env_cfg["episode_length_s"]
             )
             self.episode_sums[key][envs_idx] = 0.0
 
@@ -447,7 +505,9 @@ class Go2Env:
 
     # ---------------- Reward Functions ----------------
     def _reward_tracking_lin_vel(self):
-        lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1)
+        lin_vel_error = torch.sum(
+            torch.square(self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1
+        )
         return torch.exp(-lin_vel_error / self.reward_cfg["tracking_sigma"])
 
     def _reward_tracking_ang_vel(self):
@@ -467,260 +527,3 @@ class Go2Env:
         return torch.square(self.base_pos[:, 2] - self.reward_cfg["base_height_target"])
 
 
-# -----------------------------------------------------------------------------
-# Training Main Function
-# -----------------------------------------------------------------------------
-
-
-def train_main(args):
-    gs.init(logging_level="warning")
-    log_dir = f"logs/{args.exp_name}"
-    env_cfg, obs_cfg, reward_cfg, command_cfg = get_cfgs(args.directions)
-    train_cfg = get_train_cfg(args.exp_name, args.max_iterations)
-
-    resume_path = None
-    start_iteration = 0
-    if os.path.exists(log_dir):
-        try:
-            with open(f"{log_dir}/cfgs.pkl", "rb") as f:
-                env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(f)
-            checkpoint = train_cfg["runner"]["checkpoint"]
-            resume_path = os.path.join(log_dir, f"model_{checkpoint}.pt")
-            if os.path.exists(resume_path):
-                start_iteration = checkpoint
-            else:
-                resume_path = None
-
-            model_files = [f for f in os.listdir(log_dir) if f.startswith("model_") and f.endswith(".pt")]
-            if model_files:
-                highest_model = max(int(f.split("_")[1].split(".")[0]) for f in model_files)
-                print(f"Highest model saved: model_{highest_model}.pt")
-                start_iteration = highest_model
-                resume_path = os.path.join(log_dir, f"model_{highest_model}.pt")
-            print(f"Resuming from iteration {start_iteration}")
-        except FileNotFoundError:
-            print("Configuration file not found. Starting from the beginning.")
-            start_iteration = 0
-    else:
-        os.makedirs(log_dir, exist_ok=True)
-        start_iteration = 0
-
-    env = Go2Env(
-        num_envs=args.num_envs,
-        env_cfg=env_cfg,
-        obs_cfg=obs_cfg,
-        reward_cfg=reward_cfg,
-        command_cfg=command_cfg,
-        show_viewer=args.show_viewer,
-    )
-
-    runner = OnPolicyRunner(env, train_cfg, log_dir, device="cuda:0")
-    if resume_path:
-        runner.load(resume_path)
-
-    with open(f"{log_dir}/cfgs.pkl", "wb") as f:
-        pickle.dump([env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg], f)
-
-    logging.basicConfig(level=logging.INFO)
-    # Use a fixed number of learning iterations per update.
-    current_learning_iterations = 1
-    start_time = time.time()
-
-    for iteration in range(start_iteration, args.max_iterations):
-        # Simulate joystick input
-        joystick_input = simulate_joystick()
-        env.commands[:, 0] = joystick_input[0]
-        env.commands[:, 1] = joystick_input[1]
-        env.commands[:, 2] = joystick_input[2]
-
-        logging.info(f"Iteration {iteration + 1}/{args.max_iterations}")
-        logging.info(
-            f"Joystick Input - lin_vel_x: {joystick_input[0]}, lin_vel_y: {joystick_input[1]}, ang_vel: {joystick_input[2]}"
-        )
-        logging.info(
-            f"Commands - lin_vel_x: {env.commands[:, 0]}, lin_vel_y: {env.commands[:, 1]}, ang_vel: {env.commands[:, 2]}"
-        )
-
-        runner.learn(
-            num_learning_iterations=current_learning_iterations,
-            init_at_random_ep_len=True,
-        )
-        avg_reward = env.rew_buf.mean().item()
-        logging.info(f"Average Reward: {avg_reward}")
-        logging.info(f"Observations: {env.get_observations()}")
-
-        if iteration % 500 == 0:
-            runner.save(os.path.join(log_dir, f"model_{iteration}.pt"))
-            train_cfg["runner"]["checkpoint"] = iteration
-            with open(os.path.join(log_dir, "cfgs.pkl"), "wb") as f:
-                pickle.dump([env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg], f)
-
-        # Remove any incremental checkpoint files that are not multiples of 500.
-        for file in glob.glob(os.path.join(log_dir, "model_*.pt")):
-            try:
-                iter_num = int(os.path.basename(file).split("_")[-1].split(".")[0])
-                if iter_num % 500 != 0:
-                    os.remove(file)
-            except Exception as e:
-                logging.warning(f"Error removing file {file}: {e}")
-
-    total_elapsed_time = time.time() - start_time
-    hours, rem = divmod(total_elapsed_time, 3600)
-    minutes, seconds = divmod(rem, 60)
-    print(f"Training completed in {int(hours)}h {int(minutes)}m {int(seconds)}s")
-
-
-# -----------------------------------------------------------------------------
-# Evaluation Main Function
-# -----------------------------------------------------------------------------
-
-# Constants for evaluation keyboard control
-LINEAR_VELOCITY = 1.0
-ANGULAR_VELOCITY_RIGHT = 2.0
-ANGULAR_VELOCITY_LEFT = 2.0
-
-
-def get_keyboard_input():
-    keys = pygame.key.get_pressed()
-    lin_vel_x = 0
-    lin_vel_y = 0
-    ang_vel = 0
-
-    if keys[pygame.K_UP] and keys[pygame.K_RIGHT]:
-        lin_vel_x = LINEAR_VELOCITY
-        lin_vel_y = LINEAR_VELOCITY
-    elif keys[pygame.K_UP] and keys[pygame.K_LEFT]:
-        lin_vel_x = LINEAR_VELOCITY
-        lin_vel_y = -LINEAR_VELOCITY
-    elif keys[pygame.K_DOWN] and keys[pygame.K_RIGHT]:
-        lin_vel_x = -LINEAR_VELOCITY
-        lin_vel_y = LINEAR_VELOCITY
-    elif keys[pygame.K_DOWN] and keys[pygame.K_LEFT]:
-        lin_vel_x = -LINEAR_VELOCITY
-        lin_vel_y = -LINEAR_VELOCITY
-    elif keys[pygame.K_UP]:
-        lin_vel_x = LINEAR_VELOCITY
-    elif keys[pygame.K_DOWN]:
-        lin_vel_x = -LINEAR_VELOCITY
-    elif keys[pygame.K_RIGHT]:
-        lin_vel_y = LINEAR_VELOCITY
-    elif keys[pygame.K_LEFT]:
-        lin_vel_y = -LINEAR_VELOCITY
-    elif keys[pygame.K_q]:
-        ang_vel = ANGULAR_VELOCITY_RIGHT
-    elif keys[pygame.K_e]:
-        ang_vel = -ANGULAR_VELOCITY_LEFT
-    elif keys[pygame.K_h]:
-        show_key_mappings()
-
-    return [lin_vel_x, lin_vel_y, ang_vel]
-
-
-def show_key_mappings():
-    print("Key Mappings:")
-    print("UP: Forward")
-    print("DOWN: Reverse")
-    print("RIGHT: Right")
-    print("LEFT: Left")
-    print("UP + RIGHT: Diagonal Forward-Right")
-    print("UP + LEFT: Diagonal Forward-Left")
-    print("DOWN + RIGHT: Diagonal Reverse-Right")
-    print("DOWN + LEFT: Diagonal Reverse-Left")
-    print("Q: Rotate Right")
-    print("E: Rotate Left")
-    print("H: Show this help message")
-
-
-def eval_main(args):
-    gs.init(logging_level="warning", backend=gs.gpu)
-    log_dir = f"logs/{args.exp_name}"
-    with open(os.path.join(log_dir, "cfgs.pkl"), "rb") as f:
-        env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(f)
-    reward_cfg["reward_scales"] = {}  # Disable reward scaling during evaluation
-
-    env_cfg["episode_length_s"] = 1e6
-    env_cfg["termination_if_roll_greater_than"] = 100
-    env_cfg["termination_if_pitch_greater_than"] = 100
-
-    env = Go2Env(
-        num_envs=1,
-        env_cfg=env_cfg,
-        obs_cfg=obs_cfg,
-        reward_cfg=reward_cfg,
-        command_cfg=command_cfg,
-        show_viewer=True,
-    )
-    runner = OnPolicyRunner(env, train_cfg, log_dir, device="cuda:0")
-    resume_path = os.path.join(log_dir, f"model_{args.ckpt}.pt")
-    runner.load(resume_path)
-    policy = runner.get_inference_policy(device="cuda:0")
-
-    pygame.init()
-    screen = pygame.display.set_mode((400, 300))
-    pygame.display.set_caption("Joystick Simulation")
-
-    obs, _ = env.reset()
-    env.commands[:] = 0
-    logging_enabled = False
-    with torch.no_grad():
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-
-            joystick_input = get_keyboard_input()
-            if any(joystick_input):
-                env.commands[:, 0] = joystick_input[0]
-                env.commands[:, 1] = joystick_input[1]
-                env.commands[:, 2] = joystick_input[2]
-                if not logging_enabled:
-                    print(
-                        f"Key Pressed - lin_vel_x: {joystick_input[0]}, lin_vel_y: {joystick_input[1]}, ang_vel: {joystick_input[2]}"
-                    )
-                    logging.getLogger().setLevel(logging.INFO)
-                    logging_enabled = True
-            else:
-                env.commands[:, 0] = 0
-                env.commands[:, 1] = 0
-                env.commands[:, 2] = 0
-                if logging_enabled:
-                    logging.getLogger().setLevel(logging.WARNING)
-                    logging_enabled = False
-
-            actions = policy(obs)
-            obs, _, rews, dones, infos = env.step(actions)
-
-
-@dataclass
-class TrainCN:
-    """Go2 ET Training Configuration"""
-
-    exp_name: str = "etmove"
-    num_envs: int = 5000
-    max_iterations: int = 5000
-    show_viewer: bool = False
-
-    directions: list = field(
-        default_factory=lambda: [
-            "forward",
-            "reverse",
-            "right",
-            "left",
-            "rotate_right",
-            "rotate_left",
-        ]
-    )
-
-    resume: bool = True
-    mode: str = "train"
-
-
-def main(cfg: TrainCN):
-    pprint(cfg)
-
-    eval_main(cfg) if args.mode == "eval" else train_main(cfg)
-
-
-if __name__ == "__main__":
-    main(tyro.cli(TrainCN))
