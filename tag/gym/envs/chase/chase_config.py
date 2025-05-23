@@ -26,7 +26,7 @@ class Go2EnvConfig(EnvConfig):
 # --- Task Environments ---
 
 
-class TagConfig(Go2EnvConfig):
+class ChaseEnvConfig(Go2EnvConfig):
     task: Task = default(Task())
 
 

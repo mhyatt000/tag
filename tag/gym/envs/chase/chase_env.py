@@ -1,19 +1,19 @@
 from typing import Tuple
 
 import genesis as gs
-from gym.spaces import Box, Dict
+from gymnasium.spaces import Box, Dict
 import torch
 
 from tag.gym.base.env import BaseEnv
 from tag.gym.robots.multi import MultiRobot
 
-from .tag_config import Go2EnvConfig
+from chase_config import ChaseEnvConfig
 
 
-class TagEnv(BaseEnv):
+class Chase(BaseEnv):
     """Version 1"""
 
-    def __init__(self, args=None, cfg: Go2EnvConfig = Go2EnvConfig()):
+    def __init__(self, args=None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
         self.cfg = cfg
         # if args is not None:
         #     self.n_envs = args.n_envs
