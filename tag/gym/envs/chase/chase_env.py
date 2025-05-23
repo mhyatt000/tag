@@ -1,9 +1,10 @@
 """Chase environment implementation."""
 
-from typing import Dict, Tuple
+from typing import Dict as TDict
+from typing import Tuple
 
 import genesis as gs
-from gymnasium.spaces import Box, Dict
+from gymnasium.spaces import Dict
 import torch
 
 from tag.gym.base.env import BaseEnv
@@ -17,7 +18,7 @@ from .utils import create_camera, create_robots, create_scene
 class Chase(TerrainEnvMixin, BaseEnv):
     """Simple two-robot chase environment."""
 
-    def __init__(self, args: Dict | None = None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
+    def __init__(self, args: TDict | None = None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
         """Create a new environment instance."""
         self.cfg: ChaseEnvConfig = cfg
         # if args is not None:
@@ -46,12 +47,14 @@ class Chase(TerrainEnvMixin, BaseEnv):
         # Scene
         self.scene: gs.Scene = create_scene(cfg, self.n_rendered)
 
-        # self._init_buffers()
-        self._init_spaces()
-
         # Entities
         self.robots: MultiRobot = create_robots(self.scene, self.cfg.robotCfg)
         self.cam = create_camera(self.scene, self.cfg.vis.visualized)
+
+        # Spaces
+        self._init_spaces()
+
+        # self._init_buffers()
 
         self.build()
 
@@ -69,7 +72,7 @@ class Chase(TerrainEnvMixin, BaseEnv):
         pass
 
     # TODO: Properly Implement Step Method - Actions, Updates, etc.
-    def step(self, actions: Dict) -> Tuple[Dict, None, None, None, None]:
+    def step(self, actions: TDict) -> Tuple[TDict, None, None, None, None]:
         """Advance the simulation by one step."""
         # Execute actions
 
@@ -94,38 +97,25 @@ class Chase(TerrainEnvMixin, BaseEnv):
         return obs, None, None, None, None
 
     # TODO: Implement Reset Method
-    def reset(self) -> Tuple[Dict, None]:
+    def reset(self) -> Tuple[TDict, None]:
         """Reset the environment state."""
         return self.action_space.sample(), None
 
     # TODO: Review
-    def get_observations(self) -> Tuple[torch.Tensor, Dict]:
+    def get_observations(self) -> Tuple[torch.Tensor, TDict]:
         """Get observation buffer data
         Returns:
             Tuple[torch.Tensor, Dict]: A Tuple of the Observation Buffer and any Extras
         """
         return self._obs
 
-    def compute_observations(self) -> Dict:
+    def compute_observations(self) -> TDict:
         """Collect observations from robots and environment."""
-        robot_obs = {
-            r: {
-                "base_pos": r.robot.get_pos(),
-                "base_quat": r.robot.get_quat(),
-                "base_velo": r.robot.get_vel(),
-                "base_ang": r.robot.get_ang(),
-                "link_pos": r.robot.get_links_pos(),
-                "link_quat": r.robot.get_links_quat(),
-                "link_vel": r.robot.get_links_vel(),
-                "link_links_ang": r.robot.get_links_ang(),
-                "link_acc": r.robot.get_links_pos(),  # newer version of genesis, fake for now
-            }
-            for r in self.robots
-        }
+        robot_obs = self.robots.compute_observations()
         env_obs = {}
         terrain_obs = {}
 
-        obs = robot_obs | env_obs | terrain_obs
+        obs = {"Robots": robot_obs} | env_obs | terrain_obs
         self._obs = obs
         return self.get_observations()
 
@@ -158,47 +148,13 @@ class Chase(TerrainEnvMixin, BaseEnv):
         """Define observation and action spaces."""
         self.observation_space = Dict(
             {
-                "Robots": Dict(
-                    {
-                        "r1": Dict(  # Low and High Need to be Fixed
-                            {
-                                "base_pos": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "base_quat": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "base_velo": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "base_ang": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "link_pos": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),
-                                "link_quat": Box(low=-2, high=2, shape=(self.n_envs, 12, 4)),
-                                "link_vel": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),
-                                "link_links_ang": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),
-                                "link_acc": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),  # fake for now
-                            }
-                        ),
-                        "r2": Dict(
-                            {
-                                "base_pos": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "base_quat": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "base_velo": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "base_ang": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                                "link_pos": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),
-                                "link_quat": Box(low=-2, high=2, shape=(self.n_envs, 12, 4)),
-                                "link_vel": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),
-                                "link_links_ang": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),
-                                "link_acc": Box(low=-2, high=2, shape=(self.n_envs, 12, 3)),  # fake for now
-                            }
-                        ),
-                    }
-                ),
+                "Robots": self.robots.observation_space,
                 "Terrain": Dict({}),
                 "Obstacles": Dict({}),
             }
         )
 
-        self.action_space = Dict(
-            {
-                "r1": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-                "r2": Box(low=-2, high=2, shape=(self.n_envs, 12)),
-            }
-        )
+        self.action_space = self.robots.action_space
 
     def _update_buffers(self):
         """Example buffer update for testing."""
