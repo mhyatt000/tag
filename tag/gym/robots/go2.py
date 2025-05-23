@@ -96,16 +96,20 @@ class Go2Robot(Robot):
         obs = {
             "base_pos": self.robot.get_pos(),
             "base_quat": self.robot.get_quat(),
-            "base_velo": self.robot.get_velo(),
-            "base_ang": self.robot.get_ang(),
+            # "base_velo": self.robot.get_velo(), 
+            # "base_ang": self.robot.get_ang(),
             "link_pos": self.robot.get_links_pos(),
             "link_quat": self.robot.get_links_quat(),
             "link_vel": self.robot.get_links_vel(),
-            "link_links_ang": self.robot.get_links_ang(),
-            "link_acc": self.robot.get_links_acc(),
-            # :link_force": self.robot.get_links_net_contact_force() # Newer Genesis Version Needed
+            # "link_links_ang": self.robot.get_links_ang(),
+            # "link_acc": self.robot.get_links_acc(),
+            # "link_force": self.robot.get_links_net_contact_force() # Newer Genesis Version Needed
         }
         return obs
 
     def randomize(self, cfg):
         pass
+
+    def compute_observations(self) -> Dict:
+        """Collect observations from the robot."""
+        return self.observe_state()
