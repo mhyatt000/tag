@@ -1,6 +1,5 @@
 """Chase environment implementation."""
 
-from typing import Dict as TDict
 from typing import Tuple
 
 import genesis as gs
@@ -20,15 +19,16 @@ class Chase(BaseEnv, TerrainEnvMixin):
     """Simple two-robot chase environment."""
 
     def __init__(self, cfg: ChaseEnvConfig = ChaseEnvConfig()):
-        # , args: TDict | None = None, cfg: ChaseEnvConfig = ChaseEnvConfig()):
         """Create a new environment instance."""
         super().__init__(cfg)
         self.cfg: ChaseEnvConfig = cfg
         # TODO(dle): Have these pull from arguments/config
-        self.n_envs = 4
-        self.n_rendered = 4
+        self.n_envs = 1
+        self.n_rendered = 1
+        self.n_rendered = min(self.n_envs, self.n_rendered)
+
         self.env_spacing = (2.5, 2.5)
-        self.n_robots = 4  # TODO(dle): Place Default Value Somewhere in Task or Config
+        self.n_robots = 2  # TODO(dle): Place Default Value Somewhere in Task or Config
 
         # Scene
         self.scene: gs.Scene = create_scene(cfg, self.n_rendered)
@@ -44,7 +44,7 @@ class Chase(BaseEnv, TerrainEnvMixin):
         self.robots = MultiRobot(
             self.scene,
             self.cfg.robot,
-            [f"r{i + 1}" for i in range(self.n_robots)],
+            self.n_robots,
             self.n_envs,  # NOTE(dle):  Temp Fix
             [  ### NOTE(dle): Placeholder Color System
                 (1, 0.5, 0, 1.0),
@@ -75,7 +75,7 @@ class Chase(BaseEnv, TerrainEnvMixin):
         pass
 
     # TODO: Properly Implement Step Method - Actions, Updates, etc.
-    def step(self, actions: TDict) -> Tuple[TDict, None, None, None, None]:
+    def step(self, actions: dict) -> Tuple[dict, None, None, None, None]:
         """Advance the simulation by one step."""
         # Execute actions
 
@@ -94,15 +94,15 @@ class Chase(BaseEnv, TerrainEnvMixin):
         return obs, None, None, None, None
 
     # TODO: Implement Reset Method
-    def reset(self) -> Tuple[TDict, None]:
+    def reset(self) -> Tuple[dict, None]:
         """Reset the environment state."""
         return self.action_space.sample(), None
 
     # NOTE(dle): Do we need?
-    def get_observations(self) -> Tuple[torch.Tensor, TDict]:
+    def get_observations(self) -> Tuple[torch.Tensor, dict]:
         return self._obs
 
-    def compute_observations(self) -> TDict:
+    def compute_observations(self) -> dict:
         """Collect observations from robots and environment."""
         robot_obs = self.robots.compute_observations()
         env_obs = {}

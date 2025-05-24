@@ -48,9 +48,8 @@ class Go2Config(RobotConfig):
 
 
 class Go2Robot(Robot):
-    def __init__(self, scene: gs.Scene, cfg: Go2Config, uid: str, n_envs: int, color: Tuple | None):
+    def __init__(self, scene: gs.Scene, cfg: Go2Config, n_envs: int, color: Tuple | None):
         # TODO: Figure out spaces without passing n_envs through
-        self.uid = uid
         self.cfg = cfg
         self.robot = scene.add_entity(
             gs.morphs.URDF(
