@@ -5,40 +5,27 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "genesis-world>=0.2.1",
+    "genesis-world",
     "gymnasium>=1.1.1",
     "libigl==2.6.1",
     "matplotlib>=3.10.1",
     "mediapy>=1.2.2",
     "pytest>=8.3.5",
     "rich>=14.0.0",
-    "scipy==1.13.1",
     "torch>=2.7.0",
     "tqdm>=4.67.1",
     "tyro>=0.9.20",
     "wandb>=0.19.11",
     "jax[cuda12]>=0.5.3",
     "trimesh>=4.6.6",
+    "open3d>=0.19.0",
+    "tensorboard>=2.19.0",
 ]
 
 [project.optional-dependencies]
-brax = [
-    "brax>=0.12.1",
-    "mujoco>=3.2.5",
-    "mujoco-mjx>=3.2.5",
-]
-genesis = [
-    "genesis-lr",
-    "genesis-world>=0.2.1",
-    "open3d>=0.19.0",
-    "rsl-rl",
-    "tensorboard>=2.19.0",
-    "torch>=2.0.1",
-]
 gl = [
     "pyopengl>=3.1.0",
     "pyopengl-accelerate>=3.1.9",
-    "pyrender>=0.1.45",
 ]
 debug = [
     "ipdb>=0.13.13",
@@ -51,10 +38,9 @@ dev = [
 [tool.setuptools]
 packages = ["tag"]
 
-
-[tool.uv.sources]
-genesis-lr = { git = "https://github.com/lupinjia/genesis_lr" }
-rsl-rl = { git = "https://github.com/leggedrobotics/rsl_rl", rev = "v1.0.2" }
+# [tool.uv.sources]
+# genesis-lr = { git = "https://github.com/lupinjia/genesis_lr" }
+# rsl-rl = { git = "https://github.com/leggedrobotics/rsl_rl", rev = "v1.0.2" }
 
 # [[tool.uv.ind}x]]
 # name = "pytorch-cu124"

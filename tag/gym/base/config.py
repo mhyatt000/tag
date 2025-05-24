@@ -5,6 +5,10 @@ def default(x):
     return field(default_factory=lambda: x)
 
 
+def defaultcls(cls):
+    return field(default_factory=cls)
+
+
 # Environment Arguments
 
 
@@ -31,7 +35,12 @@ class Vis:
     visualized: bool = True
     show_world_frame: bool = True
     n_rendered_envs: int = 1
-    env_spacing: list[int] = default([0, 0])
+    env_spacing: list[float] = default([2.5, 2.5])
+
+    def __post_init__(self):
+        pass
+        # if self.n_rendered_envs == 1:
+        # self.env_spacing = [0.0, 0.0]
 
 
 @dataclass
@@ -61,9 +70,9 @@ class Task:
 
 @dataclass
 class InitState:
-    default_joint_angles: dict[str, float] = default({"joint", 1.0})  # default pose
+    # default_joint_angles: dict[str, float] # = default({"joint", 1.0})  # default pose
 
-    pos: list[float] = default((0.0, 0.0, 1.0))  # spawn position
+    pos: list[float] = default([0.0, 0.0, 1.0])  # spawn position
     quat: list[float] = default([1.0, 0.0, 0.0, 0.0])  # spawn orientation
 
     randomize_angle: bool = False  # DR - Initial Angle Spawn
@@ -102,13 +111,15 @@ class Asset:
 
 @dataclass
 class RobotConfig:
-    init_state: InitState = default(InitState())
+    init_state: InitState = defaultcls(InitState)
     state: State = default(State())
     control: Control = default(Control())
     asset: Asset = default(Asset())
 
 
 # Environment Config Class
+# TODO: Env config does not neccessarily need a robot.
+#       Robot's joints must be known in order to config
 @dataclass
 class EnvConfig:
     terrain: Terrain = default(Terrain())
@@ -116,7 +127,12 @@ class EnvConfig:
     vis: Vis = default(Vis())
     solver: Solver = default(Solver())
     sim: Sim = default(Sim())
-    robotCfg: RobotConfig = default(RobotConfig())
+
+    def __post__init__(self):
+        if self.sim.num_envs < 1:
+            raise ValueError("num_envs must be greater than 0")
+        if self.sim.num_envs < self.vis.n_rendered_envs:
+            raise ValueError("n_rendered_envs must be less than or equal to num_envs")
 
 
 # IMPLEMENT: Configurations for Tasks/Rewards/Observations
