@@ -5,6 +5,7 @@ import genesis as gs
 import torch
 
 from tag.gym.base.config import EnvConfig, Task
+from tag.names import BASE
 
 # TODO add somewhere
 # num_privileged_obs: int
@@ -47,14 +48,13 @@ class BaseEnv:
 
     def reset(self) -> None: ...
 
-    def record_visualization(self, fileName: str = None) -> None:
+    def record_visualization(self, fname: str = None) -> None:
         """Finalize and save camera recordings, if any."""
         if getattr(self.cfg.vis, "visualized", False) and hasattr(self, "cam"):
-            if fileName is None:
-                self.cam.stop_recording(save_to_filename="./tag/gym/mp4/tagV1_video.mp4", fps=60)
-            else:
-                path = "./tag/gym/mp4/" + fileName + ".mp4"
-                self.cam.stop_recording(save_to_filename=path)
+            dir = BASE / "mp4"
+            dir.mkdir(parents=True, exist_ok=True)
+            fname = dir / f'{fname if fname else "video"}.mp4'
+            self.cam.stop_recording(save_to_filename=fname, fps=60)
 
     def _init_buffers(self) -> None:
         """Allocate common buffers used for stepping the environment."""
