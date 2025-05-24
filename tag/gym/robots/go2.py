@@ -28,21 +28,21 @@ class Go2Config(RobotConfig):
 
     init_state: InitState = default(
         InitState(
+            # default_joint_angles={
+            # "FL_hip_joint": 0.1,
+            # "RL_hip_joint": 0.1,
+            # "FR_hip_joint": -0.1,
+            # "RR_hip_joint": -0.1,
+            # "FL_thigh_joint": 0.8,
+            # "RL_thigh_joint": 1.0,
+            # "FR_thigh_joint": 0.8,
+            # "RR_thigh_joint": 1.0,
+            # "FL_calf_joint": -1.5,
+            # "RL_calf_joint": -1.5,
+            # "FR_calf_joint": -1.5,
+            # "RR_calf_joint": -1.5,
+            # },
             pos=[0.0, 0.0, 0.42],
-            default_joint_angles={
-                "FL_hip_joint": 0.1,
-                "RL_hip_joint": 0.1,
-                "FR_hip_joint": -0.1,
-                "RR_hip_joint": -0.1,
-                "FL_thigh_joint": 0.8,
-                "RL_thigh_joint": 1.0,
-                "FR_thigh_joint": 0.8,
-                "RR_thigh_joint": 1.0,
-                "FL_calf_joint": -1.5,
-                "RL_calf_joint": -1.5,
-                "FR_calf_joint": -1.5,
-                "RR_calf_joint": -1.5,
-            },
         )
     )
 

@@ -2,7 +2,6 @@
 
 from typing import Tuple
 
-import genesis as gs
 from gymnasium.spaces import Dict
 import torch
 
@@ -12,33 +11,28 @@ from tag.gym.robots.multi import MultiRobot
 from tag.gym.terrain.terrain import Terrain
 
 from .chase_config import ChaseEnvConfig
-from .utils import create_camera, create_scene
+from .utils import create_camera
 
 
 class Chase(BaseEnv, TerrainEnvMixin):
     """Simple two-robot chase environment."""
 
-    def __init__(self, cfg: ChaseEnvConfig = ChaseEnvConfig()):
+    def __init__(self, cfg: ChaseEnvConfig):
         """Create a new environment instance."""
         super().__init__(cfg)
         self.cfg: ChaseEnvConfig = cfg
-        # TODO(dle): Have these pull from arguments/config
-        self.n_envs = 1
-        self.n_rendered = 1
-        self.n_rendered = min(self.n_envs, self.n_rendered)
 
-        self.env_spacing = (2.5, 2.5)
-        self.n_robots = 2  # TODO(dle): Place Default Value Somewhere in Task or Config
-
-        # Scene
-        self.scene: gs.Scene = create_scene(cfg, self.n_rendered)
+        self._init_scene()
+        self.cam = create_camera(self.scene, self.cfg.vis.visualized)
 
         # Entities
 
         # TODO(mbt): Implement Terrain System
-        # FEATURE: Obstacle System
+        # TODO(mbt): Obstacle System
         # NOTE(dle): Terrain Class Placeholder
         self.terrain = Terrain(self.scene)
+
+        self.n_robots = 2  # TODO(dle): Place Default Value Somewhere in Task or Config
 
         # TODO(mbt): Implement Color System
         self.robots = MultiRobot(
@@ -54,13 +48,7 @@ class Chase(BaseEnv, TerrainEnvMixin):
             ],  ###
         )
 
-        self.cam = create_camera(self.scene, self.cfg.vis.visualized)
-
         self._init_spaces()
-
-        # self._init_buffers()
-
-        self.build()
 
     def build(self):
         self.scene.build(

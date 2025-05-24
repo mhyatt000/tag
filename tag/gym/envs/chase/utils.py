@@ -9,23 +9,6 @@ import genesis as gs
 from tag.gym.robots.go2 import Go2Config
 from tag.gym.robots.multi import MultiRobot
 
-from .chase_config import ChaseEnvConfig
-
-
-def create_scene(cfg: ChaseEnvConfig, n_rendered: int) -> gs.Scene:
-    """Return a Genesis scene configured from ``cfg``."""
-    return gs.Scene(
-        show_viewer=cfg.viewer.show_viewer,
-        rigid_options=gs.options.RigidOptions(
-            enable_joint_limit=cfg.solver.joint_limit,
-            dt=cfg.solver.dt,
-        ),
-        vis_options=gs.options.VisOptions(
-            show_world_frame=cfg.vis.show_world_frame,
-            n_rendered_envs=n_rendered,
-        ),
-    )
-
 
 def create_robots(scene: gs.Scene, cfg: Go2Config) -> MultiRobot:
     """Instantiate the pair of Go2 robots for the chase task."""
