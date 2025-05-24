@@ -18,8 +18,10 @@ def main():
         action = policy.act(obs)
         obs, reward, terminated, truncated, info = env.step(action)
         print(f"Step {i + 1} Action: {action}")
-    env.record_data()
+    env.record_visualization("4_Robot_Dummy_Policy_Test_With_Color")
 
 
 if __name__ == "__main__":
     main()
+
+# Test Environment With Dummy Policy
