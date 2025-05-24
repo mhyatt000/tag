@@ -1,7 +1,26 @@
 from gymnasium import spaces
+from gymnasium.spaces import Box, Dict, Space
 import jax
 import numpy as np
 import torch
+
+
+def spec(tree: dict[str, np.ndarray]):
+    return jax.tree.map(lambda x: x.shape, tree)
+
+
+def batch_space(space: Space, n: int) -> Space:
+    """Wrap a Gymnasium space with an extra batch dimension of size n."""
+    if isinstance(space, Box):
+        low = np.broadcast_to(space.low, (n,) + space.shape).copy()
+        high = np.broadcast_to(space.high, (n,) + space.shape).copy()
+        return Box(low=low, high=high, dtype=space.dtype)
+
+    elif isinstance(space, Dict):
+        return Dict({key: batch_space(subsp, n) for key, subsp in space.spaces.items()})
+
+    else:
+        raise TypeError(f"batch_space() only supports Box and Dict, got {type(space)}")
 
 
 def space2spec(space: spaces.Space):
@@ -27,7 +46,7 @@ def space2spec(space: spaces.Space):
     raise TypeError(f"Unsupported space type: {type(space)}")
 
 
-def spec2batchspec(spec, n_envs: int):
+def spec2batch_spec(spec, n_envs: int):
     """Stack ``spec`` along a new leading dimension of size ``n_envs``.
 
     ``spec`` should be a nested tree of arrays as produced by :func:`space2spec`.
