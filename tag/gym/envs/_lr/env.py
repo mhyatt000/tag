@@ -15,9 +15,10 @@ import torch
 
 # from .legged_robot_config import LeggedRobotCfg
 from ..domain_rand_mixin import DomainRandMixin
+from ...mixins.camera_mixin import CameraMixin
 
 
-class LeggedRobot(DomainRandMixin):
+class LeggedRobot(DomainRandMixin, CameraMixin):
     def __init__(self, cfg: LeggedRobotCfg, sim_device, headless):
         """Parses the provided config file,
             calls create_sim() (which creates, simulation, terrain and environments),
@@ -241,24 +242,6 @@ class LeggedRobot(DomainRandMixin):
             self.terrain_y_range[0] = -self.cfg.terrain.plane_length / 2 + 1  # the plane is a square
             self.terrain_y_range[1] = self.cfg.terrain.plane_length / 2 - 1
         self._create_envs()
-
-    def set_camera(self, pos, lookat):
-        """Set camera position and direction"""
-        self.floating_camera.set_pose(pos=pos, lookat=lookat)
-
-    # ------------- Callbacks --------------
-    def _setup_camera(self):
-        """Set camera position and direction"""
-        self.floating_camera = self.scene.add_camera(
-            res=(1280, 960),
-            pos=np.array(self.cfg.viewer.pos),
-            lookat=np.array(self.cfg.viewer.lookat),
-            fov=40,
-            GUI=True,
-        )
-
-        self._recording = False
-        self._recorded_frames = []
 
     def _post_physics_step_callback(self):
         """Callback called before computing terminations, rewards, and observations
