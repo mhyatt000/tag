@@ -44,8 +44,7 @@ class LeggedRobot(BaseEnv, DomainRandMixin, TerrainMixin):
         Args:
             actions (torch.Tensor): Tensor of shape (num_envs, num_actions_per_env)
         """
-        clip_actions = self.cfg.normalization.clip_actions
-        self.actions = torch.clip(actions, -clip_actions, clip_actions).to(self.device)
+        self.actions = actions.to(self.device)
         exec_actions = self.last_actions if self.simulate_action_latency else self.actions
         if self.cfg.sim.use_implicit_controller:  # use embedded pd controller
             target_dof_pos = self._compute_target_dof_pos(exec_actions)
@@ -64,11 +63,7 @@ class LeggedRobot(BaseEnv, DomainRandMixin, TerrainMixin):
                 self.dof_vel[:] = self.robot.get_dofs_velocity(self.motor_dofs)
         self.post_physics_step()
 
-        # return clipped obs, clipped states (None), rewards, dones and infos
-        clip_obs = self.cfg.normalization.clip_observations
-        self.obs_buf = torch.clip(self.obs_buf, -clip_obs, clip_obs)
-        if self.privileged_obs_buf is not None:
-            self.privileged_obs_buf = torch.clip(self.privileged_obs_buf, -clip_obs, clip_obs)
+        # return obs, privileged obs, rewards, dones and infos
         return (
             self.obs_buf,
             self.privileged_obs_buf,
