@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from genesis.utils.geom import (inv_quat, quat_to_xyz, transform_by_quat,
-                                transform_quat_by_quat)
 from typing import Dict
 
 import genesis as gs
@@ -111,10 +109,6 @@ class Go2Config(RobotConfig):
         """Create a Go2 robot instance."""
         return Go2Robot(scene, self)
 
-    @property
-    def dof_names(self):
-        return list(self.state.joints.keys())
-
 
 @dataclass
 class PipeState:
@@ -137,15 +131,10 @@ class PipeState:
 
 class Go2Robot(Robot):
     def __init__(self, scene: gs.Scene, cfg: Go2Config):
-        self.cfg = cfg
-        self.robot = self.cfg._create(scene)
+        super().__init__(scene, cfg)
         # self.robot.set_dofs_stiffness(
         # self.robot.set_dofs_damping(
 
-    @property
-    def wrapped(self) -> RigidEntity:
-        """Return the wrapped RigidEntity."""
-        return self.robot
 
     @property
     def action_space(self) -> spaces.Box:
@@ -182,29 +171,6 @@ class Go2Robot(Robot):
         # NOTE(dle): Requires Current Genesis Branch
         # "link_acc": spaces.Box(-np.inf, np.inf, shape=(12, 3), dtype=np.float32),
 
-    def act(self, action: torch.Tensor, mode: str = "position"):
-        # FEATURE: Velocity/Force if needed
-        # NOTE(dle): dofs_idx_local should import from Go2Config, needs to be fixed.
-        if mode == "position":
-            self.robot.control_dofs_position(
-                position=action,
-                dofs_idx_local=self.dofs,
-            )
-
-    @property
-    def pos(self) -> torch.Tensor:
-        """Get the current position of the robot."""
-        return torch.tensor(self.robot.get_pos(), device=gs.device, dtype=gs.tc_float)
-
-    @property
-    def quat(self) -> torch.Tensor:
-        """Get the current orientation (quaternion) of the robot."""
-        return torch.tensor(self.robot.get_quat(), device=gs.device, dtype=gs.tc_float)
-
-    @property
-    def inv_quat(self) -> torch.Tensor:
-        """Get the inverse quaternion of the robot's orientation."""
-        return inv_quat(self.quat)
 
     def observe(self) -> Dict:
         obs = {
@@ -236,14 +202,6 @@ class Go2Robot(Robot):
     def randomize(self, cfg):
         pass
 
-    @property
-    def dofs(self):
-        # NOTE(mhyatt) new genesis API prefers dofs vs dof, which returns list
-        names = sum(
-            [self.robot.get_joint(name).dofs_idx_local for name in self.cfg.dof_names],
-            [],
-        )
-        return names
 
     @property
     def feet(self):
@@ -344,47 +302,4 @@ class Go2Robot(Robot):
         return obs
 
     def reset(self, envs_idx: list[int]):
-        _B = len(envs_idx)
-        if _B == 0:
-            return
-
-        # if state is not None:
-        # raise NotImplementedError("passed arg reset not implemented")
-
-        # TODO joint_pos flattens the joints . make sure the idxs are correct
-        def _batch_tile(item: list[int]):
-            return torch.Tensor(item).tile((_B, 1))
-
-        kp = torch.Tensor([self.cfg.control.kp for _ in range(len(self.dofs))])
-        kd = torch.Tensor([self.cfg.control.kd for _ in range(len(self.dofs))])
-        self.robot.set_dofs_kp(kp, dofs_idx_local=self.dofs)
-        self.robot.set_dofs_kv(kd, dofs_idx_local=self.dofs)
-
-        self.robot.set_dofs_position(
-            # position=self.cfg.state.joints[envs_idx], # certain states
-            position=_batch_tile(list(self.cfg.state.joints.values())),
-            dofs_idx_local=self.dofs,
-            zero_velocity=True,
-            envs_idx=envs_idx,
-        )
-
-        self.robot.set_pos(_batch_tile(self.cfg.state.pos), zero_velocity=False, envs_idx=envs_idx)
-        self.robot.set_quat(_batch_tile(self.cfg.state.quat), zero_velocity=False, envs_idx=envs_idx)
-        self.robot.zero_all_dofs_velocity(envs_idx)
-
-        # reset dofs
-        # self.dof_pos[envs_idx] = self.default_dof_pos
-        # self.dof_vel[envs_idx] = 0.0
-        # reset base
-        # self.base_pos[envs_idx] = self.cfg.state.pos.reshape(1, -1)
-        # self.base_quat[envs_idx] = self.cfg.state.quat.reshape(1, -1)
-        # reset velocity
-        # self.base_lin_vel[envs_idx] = 0
-        # self.base_ang_vel[envs_idx] = 0
-        # reset buffers
-        # self.last_actions[envs_idx] = 0.0
-        # self.last_dof_vel[envs_idx] = 0.0
-        # self.episode_length_buf[envs_idx] = 0
-        # self.reset_buf[envs_idx] = True
-
-        # TODO observe state
+        super().reset(envs_idx)
