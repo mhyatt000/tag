@@ -14,11 +14,14 @@ from .mixins import CameraMixin, DomainRandMixin, TerrainMixin
 from .mixins.cam import Cam
 from .mixins.terrain import Terrain
 
+from tag.gym.terrain.terrain import TerrainFactoryConfig
+
 
 @dataclass
 class WorldEnvConfig(BaseEnvConfig):
     terrain: Terrain = defaultcls(Terrain)
     cam: Cam = defaultcls(Cam)
+    terrainfactory: TerrainFactoryConfig = defaultcls(TerrainFactoryConfig)
 
 
 class WorldEnv(BaseEnv, TerrainMixin, CameraMixin, DomainRandMixin):
@@ -27,7 +30,7 @@ class WorldEnv(BaseEnv, TerrainMixin, CameraMixin, DomainRandMixin):
     def __init__(self, cfg: WorldEnvConfig):
         super().__init__(cfg)
 
-        self._init_terrain()  # TODO uncomment when terrain is ready
+        self._init_terrain(cfg.terrainfactory)  # TODO uncomment when terrain is ready
         self._setup_camera()
 
         # TODO inherit camera obs space

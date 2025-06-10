@@ -5,6 +5,7 @@ from genesis import gs
 import numpy as np
 import torch
 
+import tag.gym.terrain.terrain as terrain
 
 class TerrainType(str, Enum):
     NONE = "none"
@@ -62,8 +63,41 @@ class TerrainMixin:
         if self.cfg.terrain.typ not in ["heightfield"]:
             self.cfg.terrain.curriculum = False
 
-    def _init_terrain(self):
-        self.terrain = self.scene.add_entity(gs.morphs.Plane(collision=True, fixed=True))
+    def _init_terrain(self, tcfg:terrain.TerrainFactoryConfig):
+        if self.cfg.terrain.typ in ["plane"]:
+            self.terrain = self.scene.add_entity(gs.morphs.Plane(collision=True, fixed=True))
+        else:
+            factory = terrain.TerrainFactory(
+                tcfg.n,
+                tcfg.size,
+                tcfg.z_offset,
+                tcfg.horizontal_scale,
+                tcfg.vertical_scale,
+                tcfg.subterrain_types
+            )
+
+            factory.add_walls(
+                n = tcfg.wall_count,
+                max_n = tcfg.wall_count_max,
+                length = tcfg.wall_length,
+                max_length = tcfg.wall_length_max,
+                width = tcfg.wall_width,
+                max_width = tcfg,
+                height = tcfg.wall_height,
+                max_height = tcfg.wall_height_max,
+                vertical_only = tcfg.walls_vertical_only,
+                horizontal_only = tcfg.walls_horizontal_only
+            )
+
+            if tcfg.perimeter_walls:
+                factory.add_perimeter_walls(
+                    thickness = tcfg.perimeter_thickness,
+                    height = tcfg.perimeter_height,
+                    max_height = tcfg.perimeter_height_max
+                )
+
+            self.terrain = self.scene.add_entity(factory.terrain())
+
         self.terrain.set_friction(self.cfg.terrain.friction)
         # TODO(mbt): Implement Terrain System
         # TODO(mbt): Obstacle System
